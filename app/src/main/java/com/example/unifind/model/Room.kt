@@ -13,6 +13,15 @@ class Room(
 ) : Searchable {
 
     override fun matches(query: String): Boolean {
-        return name.contains(query, ignoreCase = true)
+        val normName = name.replace(Regex("[ .-]"), "").lowercase()
+        val normQuery = query.replace(Regex("[ .-]"), "").lowercase()
+        if (normName.contains(normQuery)) return true
+        
+        val normCollege = ownerCollege?.replace(Regex("[ .-]"), "")?.lowercase() ?: ""
+        if (normCollege.contains(normQuery) && normQuery.isNotEmpty()) return true
+        
+        return sharedWith.any {
+            it.replace(Regex("[ .-]"), "").lowercase().contains(normQuery)
+        }
     }
 }

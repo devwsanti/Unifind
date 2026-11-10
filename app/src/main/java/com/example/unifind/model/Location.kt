@@ -21,7 +21,9 @@ abstract class Location(
     abstract fun describe(): String
 
     override fun matches(query: String): Boolean {
-        return name.contains(query, ignoreCase = true)
+        val normName = name.replace(Regex("[ .-]"), "").lowercase()
+        val normQuery = query.replace(Regex("[ .-]"), "").lowercase()
+        return normName.contains(normQuery)
     }
 
     override fun getEntryPoint(): Pair<Float, Float> {
