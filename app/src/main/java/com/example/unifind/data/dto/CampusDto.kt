@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CampusDto(
+    val colleges: List<String> = emptyList(),
     val gates: List<GateDto> = emptyList(),
     val facilities: List<FacilityDto> = emptyList(),
     val buildings: List<BuildingDto> = emptyList()

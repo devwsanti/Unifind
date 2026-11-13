@@ -44,6 +44,8 @@ class CampusRepository(private val context: Context) {
 
     fun getFacilities(): List<Facility> = locationsList.filterIsInstance<Facility>()
 
+    fun getColleges(): List<String> = campusData.colleges
+
     fun findById(id: String): Location? = locationsList.find { it.id == id }
 
     // Mapper extension functions

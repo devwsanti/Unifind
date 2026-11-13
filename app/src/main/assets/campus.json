@@ -1,16 +1,84 @@
 {
+  "colleges": [
+    "College of Information and Computing Sciences",
+    "College of Teacher Education",
+    "College of Accountancy, Business, Economics, and International Hospitality Management",
+    "College of Arts and Sciences",
+    "College of Health Sciences",
+    "College of Criminal Justice Education",
+    "Laboratory School"
+  ],
   "gates": [
-    { "id": "gate_1", "name": "Gate 1", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "gate_2", "name": "Gate 2", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "gate_3", "name": "Gate 3", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "gate_4", "name": "Gate 4", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "gate_5", "name": "Gate 5", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null }
+    {
+      "id": "gate_1",
+      "name": "Gate 1",
+      "mapX": 0.1458,
+      "mapY": 0.8138,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "gate_2",
+      "name": "Gate 2",
+      "mapX": 0.4494,
+      "mapY": 0.54,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "gate_3",
+      "name": "Gate 3",
+      "mapX": 0.5647,
+      "mapY": 0.8497,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "gate_4",
+      "name": "Gate 4",
+      "mapX": 0.8013,
+      "mapY": 0.8557,
+      "latitude": null,
+      "longitude": null
+    }
   ],
   "facilities": [
-    { "id": "library", "name": "Library", "category": "LIBRARY", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "lian_cafeteria", "name": "Lian Cafeteria", "category": "CAFETERIA", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "rosario_cafeteria", "name": "Rosario Cafeteria", "category": "CAFETERIA", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null },
-    { "id": "joson_gym", "name": "Joson Gymnasium", "category": "GYM", "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null }
+    {
+      "id": "library",
+      "name": "Library",
+      "category": "LIBRARY",
+      "mapX": 0.866,
+      "mapY": 0.4377,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "lian_cafeteria",
+      "name": "Lian Cafeteria",
+      "category": "CAFETERIA",
+      "mapX": 0.3422,
+      "mapY": 0.482,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "rosario_cafeteria",
+      "name": "Rosario Cafeteria",
+      "category": "CAFETERIA",
+      "mapX": 0.6689,
+      "mapY": 0.702,
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "id": "joson_gym",
+      "name": "Joson Gymnasium",
+      "category": "GYM",
+      "mapX": 0.584,
+      "mapY": 0.6135,
+      "latitude": null,
+      "longitude": null
+    }
   ],
   "buildings": [
     {
@@ -18,41 +86,215 @@
       "name": "Higher Education Building",
       "college": "Shared",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.3474,
+      "mapY": 0.6739,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "heb_faculty", "name": "Faculty Room", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_101", "name": "HEB101", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_102", "name": "HEB102", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_103", "name": "HEB103", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_104", "name": "HEB104", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_105", "name": "HEB105", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "heb_internet_lab", "name": "Internet Lab", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_ict_office", "name": "ICT Office", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_computer_lab", "name": "HEB Computer Lab", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_201", "name": "HEB201", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_202", "name": "HEB202", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_203", "name": "HEB203", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_204", "name": "HEB204", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_205", "name": "HEB205", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_206", "name": "HEB206", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_207", "name": "HEB207", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_208", "name": "HEB208", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_male_cr_2f", "name": "Male CR", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_female_cr_2f", "name": "Female CR", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "3rd Floor", "rooms": [
-          { "id": "heb_chem_lab", "name": "Chemistry Lab", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_borrowing", "name": "Borrowing & Returning", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_physics_lab", "name": "Physics Lab", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_305", "name": "HEB305", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_306", "name": "HEB306", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_307", "name": "HEB307", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_308", "name": "HEB308", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "heb_cr_3f", "name": "Male & Female CR", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "heb_faculty",
+              "name": "Faculty Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_101",
+              "name": "HEB101",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_102",
+              "name": "HEB102",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_103",
+              "name": "HEB103",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_104",
+              "name": "HEB104",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_105",
+              "name": "HEB105",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "heb_internet_lab",
+              "name": "Internet Lab",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_ict_office",
+              "name": "ICT Office",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_computer_lab",
+              "name": "HEB Computer Lab",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_201",
+              "name": "HEB201",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_202",
+              "name": "HEB202",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_203",
+              "name": "HEB203",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_204",
+              "name": "HEB204",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_205",
+              "name": "HEB205",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_206",
+              "name": "HEB206",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_207",
+              "name": "HEB207",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_208",
+              "name": "HEB208",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_male_cr_2f",
+              "name": "Male CR",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_female_cr_2f",
+              "name": "Female CR",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "3rd Floor",
+          "rooms": [
+            {
+              "id": "heb_chem_lab",
+              "name": "Chemistry Lab",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_borrowing",
+              "name": "Borrowing & Returning",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_physics_lab",
+              "name": "Physics Lab",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_305",
+              "name": "HEB305",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_306",
+              "name": "HEB306",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_307",
+              "name": "HEB307",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_308",
+              "name": "HEB308",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_cr_3f",
+              "name": "Male & Female CR",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -60,48 +302,255 @@
       "name": "College of Teacher Education Building",
       "college": "College of Teacher Education",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.5074,
+      "mapY": 0.424,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "cteb_101", "name": "CTEB101", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_102", "name": "CTEB102", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_103", "name": "CTEB103", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_104", "name": "CTEB104", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_105", "name": "CTEB105", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_106", "name": "CTEB106", "floorLabel": "1st Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_labschool_faculty", "name": "Lab School Faculty Room", "floorLabel": "1st Floor", "ownerCollege": "Laboratory School", "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "cteb_201", "name": "CTEB201", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_202", "name": "CTEB202", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_203", "name": "CTEB203", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_204", "name": "CTEB204", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_205", "name": "CTEB205", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_206", "name": "CTEB206", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_207", "name": "CTEB207", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_208", "name": "CTEB208", "floorLabel": "2nd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] }
-        ]},
-        { "label": "3rd Floor", "rooms": [
-          { "id": "cteb_301", "name": "CTEB301", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_302", "name": "CTEB302", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_303", "name": "CTEB303", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_304", "name": "CTEB304", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_305", "name": "CTEB305", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_306", "name": "CTEB306", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_cte_faculty", "name": "CTE Faculty Room", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_conference", "name": "Conference Room", "floorLabel": "3rd Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] }
-        ]},
-        { "label": "4th Floor", "rooms": [
-          { "id": "cteb_401", "name": "CTEB401", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_402", "name": "CTEB402", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_403", "name": "CTEB403", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_404", "name": "CTEB404", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_405", "name": "CTEB405", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_406", "name": "CTEB406", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_electrical", "name": "Electrical Room", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "cteb_bio_room", "name": "Bio Room", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] },
-          { "id": "cteb_speech_lab", "name": "Speech Lab", "floorLabel": "4th Floor", "ownerCollege": "College of Teacher Education", "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "cteb_101",
+              "name": "CTEB101",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_102",
+              "name": "CTEB102",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_103",
+              "name": "CTEB103",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_104",
+              "name": "CTEB104",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_105",
+              "name": "CTEB105",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_106",
+              "name": "CTEB106",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_labschool_faculty",
+              "name": "Lab School Faculty Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "Laboratory School",
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "cteb_201",
+              "name": "CTEB201",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_202",
+              "name": "CTEB202",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_203",
+              "name": "CTEB203",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_204",
+              "name": "CTEB204",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_205",
+              "name": "CTEB205",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_206",
+              "name": "CTEB206",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_207",
+              "name": "CTEB207",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_208",
+              "name": "CTEB208",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "3rd Floor",
+          "rooms": [
+            {
+              "id": "cteb_301",
+              "name": "CTEB301",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_302",
+              "name": "CTEB302",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_303",
+              "name": "CTEB303",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_304",
+              "name": "CTEB304",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_305",
+              "name": "CTEB305",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_306",
+              "name": "CTEB306",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_cte_faculty",
+              "name": "CTE Faculty Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_conference",
+              "name": "Conference Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "4th Floor",
+          "rooms": [
+            {
+              "id": "cteb_401",
+              "name": "CTEB401",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_402",
+              "name": "CTEB402",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_403",
+              "name": "CTEB403",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_404",
+              "name": "CTEB404",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_405",
+              "name": "CTEB405",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_406",
+              "name": "CTEB406",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_electrical",
+              "name": "Electrical Room",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_bio_room",
+              "name": "Bio Room",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            },
+            {
+              "id": "cteb_speech_lab",
+              "name": "Speech Lab",
+              "floorLabel": "4th Floor",
+              "ownerCollege": "College of Teacher Education",
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -109,27 +558,138 @@
       "name": "College of Arts and Sciences Building",
       "college": "College of Arts and Sciences",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.5744,
+      "mapY": 0.2339,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "casb_female_cr", "name": "Female CR", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "casb_moot_court", "name": "Moot Court", "floorLabel": "1st Floor", "ownerCollege": "College of Criminal Justice Education", "sharedWith": ["College of Arts and Sciences"] },
-          { "id": "casb_psych_testing", "name": "Psychological Testing Room", "floorLabel": "1st Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": ["College of Criminal Justice Education"] },
-          { "id": "casb_experimental_lab", "name": "Experimental Laboratory", "floorLabel": "1st Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_dean", "name": "Office of the Dean", "floorLabel": "1st Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_assoc_dean", "name": "CAS Associate Dean's and Program Chairperson Room", "floorLabel": "1st Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "casb_multimedia", "name": "Multimedia Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_archive", "name": "Archive Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_crime_lab", "name": "Crime Laboratory", "floorLabel": "2nd Floor", "ownerCollege": "College of Criminal Justice Education", "sharedWith": ["College of Arts and Sciences"] },
-          { "id": "casb_lie_detector", "name": "Lie Detector Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Criminal Justice Education", "sharedWith": ["College of Arts and Sciences"] },
-          { "id": "casb_crime_scene", "name": "Crime Scene Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Criminal Justice Education", "sharedWith": ["College of Arts and Sciences"] },
-          { "id": "casb_dark_room", "name": "Dark Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": ["College of Criminal Justice Education"] },
-          { "id": "casb_radio_broadcasting", "name": "Radio Broadcasting Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_editing", "name": "Editing Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "casb_radio_tv", "name": "Radio and Television Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "casb_female_cr",
+              "name": "Female CR",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "casb_moot_court",
+              "name": "Moot Court",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Criminal Justice Education",
+              "sharedWith": [
+                "College of Arts and Sciences"
+              ]
+            },
+            {
+              "id": "casb_psych_testing",
+              "name": "Psychological Testing Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": [
+                "College of Criminal Justice Education"
+              ]
+            },
+            {
+              "id": "casb_experimental_lab",
+              "name": "Experimental Laboratory",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_dean",
+              "name": "Office of the Dean",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_assoc_dean",
+              "name": "CAS Associate Dean's and Program Chairperson Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "casb_multimedia",
+              "name": "Multimedia Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_archive",
+              "name": "Archive Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_crime_lab",
+              "name": "Crime Laboratory",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Criminal Justice Education",
+              "sharedWith": [
+                "College of Arts and Sciences"
+              ]
+            },
+            {
+              "id": "casb_lie_detector",
+              "name": "Lie Detector Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Criminal Justice Education",
+              "sharedWith": [
+                "College of Arts and Sciences"
+              ]
+            },
+            {
+              "id": "casb_crime_scene",
+              "name": "Crime Scene Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Criminal Justice Education",
+              "sharedWith": [
+                "College of Arts and Sciences"
+              ]
+            },
+            {
+              "id": "casb_dark_room",
+              "name": "Dark Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": [
+                "College of Criminal Justice Education"
+              ]
+            },
+            {
+              "id": "casb_radio_broadcasting",
+              "name": "Radio Broadcasting Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_editing",
+              "name": "Editing Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "casb_radio_tv",
+              "name": "Radio and Television Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -137,33 +697,168 @@
       "name": "Lemery Building",
       "college": "College of Health Sciences",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.5818,
+      "mapY": 0.1795,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "lemery_sensory_lab", "name": "Sensory Laboratory", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_faculty_dean", "name": "Faculty Room & Dean's Room", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_physico_lab", "name": "Physico-Chemical Laboratory", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_electrical", "name": "Electrical Room", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "lemery_micro_lab", "name": "Microbiology and Parasitology Laboratory / Food Microbiology and Parasitology Laboratory", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_nutrition_lab", "name": "Nutrition Laboratory", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_cr", "name": "Male and Female CR", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "lemery_lb101", "name": "LB101", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_lb102", "name": "LB102", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_lb103", "name": "LB103", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_lb104", "name": "LB104", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_anafy_room", "name": "Anafy Room", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_nutrition_clinic", "name": "Levi's Room / Nutrition Clinic", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_nursing_skills_lab", "name": "Nursing Skills Laboratory Kit", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_amphitheater", "name": "Amphitheater", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_csr", "name": "Central Supply Room (CSR)", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_private_room", "name": "Private Room", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_emergency_room", "name": "Emergency Room", "floorLabel": "1st Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "lemery_lb201", "name": "LB201", "floorLabel": "2nd Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_lb202", "name": "LB202", "floorLabel": "2nd Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] },
-          { "id": "lemery_lb203", "name": "LB203", "floorLabel": "2nd Floor", "ownerCollege": "College of Health Sciences", "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "lemery_sensory_lab",
+              "name": "Sensory Laboratory",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_faculty_dean",
+              "name": "Faculty Room & Dean's Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_physico_lab",
+              "name": "Physico-Chemical Laboratory",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_electrical",
+              "name": "Electrical Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_micro_lab",
+              "name": "Microbiology and Parasitology Laboratory / Food Microbiology and Parasitology Laboratory",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_nutrition_lab",
+              "name": "Nutrition Laboratory",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_cr",
+              "name": "Male and Female CR",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb101",
+              "name": "LB101",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb102",
+              "name": "LB102",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb103",
+              "name": "LB103",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb104",
+              "name": "LB104",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_anaphy_room",
+              "name": "Anaphy Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_nutrition_clinic",
+              "name": "Levi's Room / Nutrition Clinic",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_nursing_skills_lab",
+              "name": "Nursing Skills Laboratory Kit",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_amphitheater",
+              "name": "Amphitheater",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_csr",
+              "name": "Central Supply Room (CSR)",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_private_room",
+              "name": "Private Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_emergency_room",
+              "name": "Emergency Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "lemery_lb201",
+              "name": "LB201",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb202",
+              "name": "LB202",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_lb203",
+              "name": "LB203",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Health Sciences",
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -171,84 +866,369 @@
       "name": "Taal Building",
       "college": "College of Accountancy, Business, Economics, and International Hospitality Management",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.8764,
+      "mapY": 0.6978,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "taal_female_cr_1f", "name": "Female CR", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_food_production", "name": "Food Production Training Area", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_1f", "name": "Electrical Room", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_male_cr_1f", "name": "Male CR", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "taal_male_cr_2f", "name": "Male CR", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_dress_making", "name": "Dress Making Room", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_2f", "name": "Electrical Room", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_skills_dev", "name": "Skills Development Center", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_community_engagement", "name": "Community Engagement Office", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_female_cr_2f", "name": "Female CR", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_fire_exit_2f", "name": "Fire Exit", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_accu_area_2f", "name": "ACCU Area", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "3rd Floor", "rooms": [
-          { "id": "taal_male_cr_3f", "name": "Male CR", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_extension_service", "name": "Extension Service Office", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_3f", "name": "Electrical Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_lecture_1", "name": "Lecture 1 Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_2_3f", "name": "Electrical 2 Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_3_3f", "name": "Electrical 3 Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_4_3f", "name": "Electrical 4 Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_5_3f", "name": "Electrical 5 Room", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_female_cr_3f", "name": "Female CR", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_fire_exit_3f", "name": "Fire Exit", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_accu_area_3f", "name": "ACCU Area", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "4th Floor", "rooms": [
-          { "id": "taal_male_cr_4f", "name": "Male CR", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_male_dorm_1", "name": "Male 1 Dormitory", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_male_dorm_2", "name": "Male 2 Dormitory", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_electrical_4f", "name": "Electrical Room", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_female_dorm_1", "name": "Female 1 Dormitory", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_female_dorm_2", "name": "Female 2 Dormitory", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_female_dorm_3", "name": "Female 3 Dormitory", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_mess_hall", "name": "Mess Hall", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_fire_exit_4f", "name": "Fire Exit", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "taal_accu_area_4f", "name": "ACCU Area", "floorLabel": "4th Floor", "ownerCollege": null, "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "taal_female_cr_1f",
+              "name": "Female CR",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_food_production",
+              "name": "Food Production Training Area",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_1f",
+              "name": "Electrical Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_male_cr_1f",
+              "name": "Male CR",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "taal_male_cr_2f",
+              "name": "Male CR",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_dress_making",
+              "name": "Dress Making Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_2f",
+              "name": "Electrical Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_skills_dev",
+              "name": "Skills Development Center",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_community_engagement",
+              "name": "Community Engagement Office",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_female_cr_2f",
+              "name": "Female CR",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_fire_exit_2f",
+              "name": "Fire Exit",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_accu_area_2f",
+              "name": "ACCU Area",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "3rd Floor",
+          "rooms": [
+            {
+              "id": "taal_male_cr_3f",
+              "name": "Male CR",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_extension_service",
+              "name": "Extension Service Office",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_3f",
+              "name": "Electrical Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_lecture_1",
+              "name": "Lecture 1 Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_2_3f",
+              "name": "Electrical 2 Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_3_3f",
+              "name": "Electrical 3 Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_4_3f",
+              "name": "Electrical 4 Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_5_3f",
+              "name": "Electrical 5 Room",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_female_cr_3f",
+              "name": "Female CR",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_fire_exit_3f",
+              "name": "Fire Exit",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_accu_area_3f",
+              "name": "ACCU Area",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "4th Floor",
+          "rooms": [
+            {
+              "id": "taal_male_cr_4f",
+              "name": "Male CR",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_male_dorm_1",
+              "name": "Male 1 Dormitory",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_male_dorm_2",
+              "name": "Male 2 Dormitory",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_electrical_4f",
+              "name": "Electrical Room",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_female_dorm_1",
+              "name": "Female 1 Dormitory",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_female_dorm_2",
+              "name": "Female 2 Dormitory",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_female_dorm_3",
+              "name": "Female 3 Dormitory",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_mess_hall",
+              "name": "Mess Hall",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_fire_exit_4f",
+              "name": "Fire Exit",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "taal_accu_area_4f",
+              "name": "ACCU Area",
+              "floorLabel": "4th Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
       "id": "imt",
-      "name": "IMT Building",
+      "name": "Institute of Marine Technology (IMT) Building",
       "college": "Shared",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.8437,
+      "mapY": 0.3756,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "imt_cas_faculty", "name": "CAS Faculty", "floorLabel": "1st Floor", "ownerCollege": "College of Arts and Sciences", "sharedWith": [] },
-          { "id": "imt_vc_academic_affairs", "name": "Office of the Vice Chancellor for Academic Affairs", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "imt_dean", "name": "Office of the Dean", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "imt_cics_faculty", "name": "CICS Faculty Room", "floorLabel": "2nd Floor", "ownerCollege": "College of Information and Computing Sciences", "sharedWith": [] },
-          { "id": "imt_vc_res", "name": "Office of the Vice Chancellor for Research, Development and Extension Services", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "imt_cas_faculty",
+              "name": "CAS Faculty",
+              "floorLabel": "1st Floor",
+              "ownerCollege": "College of Arts and Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "imt_vc_academic_affairs",
+              "name": "Office of the Vice Chancellor for Academic Affairs",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "imt_dean",
+              "name": "Office of the Dean",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "imt_cics_faculty",
+              "name": "CICS Faculty Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": "College of Information and Computing Sciences",
+              "sharedWith": []
+            },
+            {
+              "id": "imt_vc_res",
+              "name": "Office of the Vice Chancellor for Research, Development and Extension Services",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
-      "id": "admin",
-      "name": "Administration Building",
+      "id": "ermita",
+      "name": "Ermita Building",
       "college": "Administration",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.869,
+      "mapY": 0.5717,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "admin_cashier", "name": "Cashier", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "admin_internal_audit", "name": "Internal Audit Service", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "admin_student_publication", "name": "Student Publication", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "admin_cit_dean_faculty", "name": "CIT Associate Dean & Faculty Room", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "ermita_cashier",
+              "name": "Cashier",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "ermita_internal_audit",
+              "name": "Internal Audit Service",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "ermita_student_publication",
+              "name": "Student Publication",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "ermita_cit_dean_faculty",
+              "name": "CIT Associate Dean & Faculty Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
@@ -256,43 +1236,282 @@
       "name": "Hostel Building",
       "college": "College of Accountancy, Business, Economics, and International Hospitality Management",
       "status": "ACTIVE",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.2329,
+      "mapY": 0.5681,
+      "latitude": null,
+      "longitude": null,
       "floors": [
-        { "label": "1st Floor", "rooms": [
-          { "id": "hostel_tour_travel", "name": "Tour and Travel Mock Room", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_fb_lab", "name": "Food and Beverage Lab", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_cold_kitchen", "name": "Cold Kitchen", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_hot_kitchen", "name": "Hot Kitchen", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_linen_laundry", "name": "Linen and Laundry Room", "floorLabel": "1st Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "2nd Floor", "rooms": [
-          { "id": "hostel_housekeeping_lab", "name": "Housekeeping Lab", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_function_a", "name": "Function Room A", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_function_b", "name": "Function Room B", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_function_c", "name": "Function Room C", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_function_d", "name": "Function Room D", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_function_e", "name": "Function Room E", "floorLabel": "2nd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]},
-        { "label": "3rd Floor", "rooms": [
-          { "id": "hostel_executive_suite", "name": "Executive Suite / Presidential Suite", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_301", "name": "Room 301", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_302", "name": "Room 302", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_303", "name": "Room 303", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_304", "name": "Room 304", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_305", "name": "Room 305", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_306", "name": "Room 306", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_307", "name": "Room 307", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_308", "name": "Room 308", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] },
-          { "id": "hostel_dormitory", "name": "Dormitory", "floorLabel": "3rd Floor", "ownerCollege": null, "sharedWith": [] }
-        ]}
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "hostel_tour_travel",
+              "name": "Tour and Travel Mock Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_fb_lab",
+              "name": "Food and Beverage Lab",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_cold_kitchen",
+              "name": "Cold Kitchen",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_hot_kitchen",
+              "name": "Hot Kitchen",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_linen_laundry",
+              "name": "Linen and Laundry Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "hostel_housekeeping_lab",
+              "name": "Housekeeping Lab",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_function_a",
+              "name": "Function Room A",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_function_b",
+              "name": "Function Room B",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_function_c",
+              "name": "Function Room C",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_function_d",
+              "name": "Function Room D",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_function_e",
+              "name": "Function Room E",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "3rd Floor",
+          "rooms": [
+            {
+              "id": "hostel_executive_suite",
+              "name": "Executive Suite / Presidential Suite",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_301",
+              "name": "Room 301",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_302",
+              "name": "Room 302",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_303",
+              "name": "Room 303",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_304",
+              "name": "Room 304",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_305",
+              "name": "Room 305",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_306",
+              "name": "Room 306",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_307",
+              "name": "Room 307",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_308",
+              "name": "Room 308",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hostel_dormitory",
+              "name": "Dormitory",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hatchery",
+      "name": "Hatchery & Research Building",
+      "college": "Shared",
+      "status": "ACTIVE",
+      "mapX": 0.8839,
+      "mapY": 0.6201,
+      "latitude": null,
+      "longitude": null,
+      "floors": [
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "hatchery_sports",
+              "name": "Sports Office",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "hatchery_culture_arts",
+              "name": "Culture and Arts Office",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "apacible",
+      "name": "Apacible Museum",
+      "college": "Administration",
+      "status": "ACTIVE",
+      "mapX": 0.5647,
+      "mapY": 0.7217,
+      "latitude": null,
+      "longitude": null,
+      "floors": [
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "apacible_chancellor",
+              "name": "Office of the Chancellor",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "apacible_testing",
+              "name": "Testing and Admission",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        },
+        {
+          "label": "2nd Floor",
+          "rooms": [
+            {
+              "id": "apacible_accounting_ge_faculty",
+              "name": "Accounting General Education Faculty Room",
+              "floorLabel": "2nd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "infirmary",
+      "name": "Infirmary",
+      "college": "Administration",
+      "status": "ACTIVE",
+      "mapX": 0.7187,
+      "mapY": 0.6399,
+      "latitude": null,
+      "longitude": null,
+      "floors": [
+        {
+          "label": "1st Floor",
+          "rooms": [
+            {
+              "id": "infirmary_scholarship",
+              "name": "Scholarship & Financial Assistance Office",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            }
+          ]
+        }
       ]
     },
     {
       "id": "sto_tomas",
       "name": "Sto. Tomas Building",
-      "college": "Unassigned",
+      "college": "College of Information and Computing Sciences",
       "status": "UNDER_CONSTRUCTION",
-      "mapX": 0.0, "mapY": 0.0, "latitude": null, "longitude": null,
+      "mapX": 0.465,
+      "mapY": 0.6978,
+      "latitude": null,
+      "longitude": null,
       "floors": []
     }
   ]
