@@ -1,0 +1,16 @@
+{
+  "imageWidth": 941,
+  "imageHeight": 1171,
+  "metersPerPixel": 0.2,
+  "nodes": [
+    { "id": "n1", "mapX": 0.1, "mapY": 0.1, "locationId": "gate_1" },
+    { "id": "n2", "mapX": 0.1, "mapY": 0.5, "locationId": null },
+    { "id": "n3", "mapX": 0.5, "mapY": 0.5, "locationId": null },
+    { "id": "n4", "mapX": 0.5, "mapY": 0.8, "locationId": "ermita" }
+  ],
+  "edges": [
+    ["n1", "n2"],
+    ["n2", "n3"],
+    ["n3", "n4"]
+  ]
+}
