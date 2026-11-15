@@ -53,6 +53,10 @@ fun MapScreen(
     var calibrationTap by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var legendExpanded by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
+    
+    val editorUpdateTrigger by editorViewModel.updateTrigger.collectAsState()
+    var showValidate by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(locationId) {
         if (locationId != null) {
@@ -68,6 +72,8 @@ fun MapScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             if (isEditMode) {
+                val trigger = editorUpdateTrigger
+                var editorMenuExpanded by remember { mutableStateOf(false) }
                 TopAppBar(
                     title = {
                         val nodeCount = editorViewModel.editorState.nodes.size
@@ -80,6 +86,58 @@ fun MapScreen(
                     actions = {
                         Button(onClick = { onEditModeChange(false) }) {
                             Text("Exit editor", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                        Box {
+                            IconButton(onClick = { editorMenuExpanded = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "Editor Menu")
+                            }
+                            DropdownMenu(
+                                expanded = editorMenuExpanded,
+                                onDismissRequest = { editorMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Undo", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        editorViewModel.undo()
+                                        editorMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Validate", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        showValidate = true
+                                        editorMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Copy JSON", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        val json = editorViewModel.getJson()
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        clipboard.setPrimaryClip(ClipData.newPlainText("Graph JSON", json))
+                                        editorMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Share JSON", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        val json = editorViewModel.getJson()
+                                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(android.content.Intent.EXTRA_TEXT, json)
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(intent, "Share JSON"))
+                                        editorMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Clear all", color = Color.Red, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        showClearConfirm = true
+                                        editorMenuExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 )
@@ -158,35 +216,38 @@ fun MapScreen(
                         val w = maxWidth
                         val h = maxHeight
 
-                        if (isEditMode) {
-                            EditorOverlay(
-                                scale = scale,
-                                containerWidth = w.value,
-                                containerHeight = h.value,
-                                viewModel = editorViewModel
-                            )
-                        } else {
-                            placedLocations.forEach { loc ->
-                                MapPin(
-                                    location = loc,
-                                    scale = scale,
-                                    isSelected = loc.id == selectedLocation?.id,
-                                    onClick = {
-                                        if (!isCalibrationMode) {
-                                            viewModel.selectLocation(loc)
-                                        }
-                                    },
-                                    modifier = Modifier.offset(
-                                        x = w * loc.mapX,
-                                        y = h * loc.mapY
-                                    )
-                                )
-                            }
-                        }
+                        placedLocations.forEach { loc ->
+                        val (absX, absY) = MapCoordinates.toAbsolute(loc.mapX, loc.mapY, w.value, h.value)
+                        MapPin(
+                            location = loc,
+                            scale = scale,
+                            isSelected = loc.id == selectedLocation?.id,
+                            onClick = {
+                                if (!isCalibrationMode && !isEditMode) {
+                                    viewModel.selectLocation(loc)
+                                }
+                            },
+                            modifier = Modifier.offset(
+                                x = absX.dp,
+                                y = absY.dp
+                            ),
+                            isEditorMode = isEditMode
+                        )
+                    }
+
+                    if (isEditMode) {
+                        EditorOverlay(
+                            scale = scale,
+                            containerWidth = w.value,
+                            containerHeight = h.value,
+                            viewModel = editorViewModel
+                        )
+                    }
 
                         // Show temporary pin for calibration mode
                         if (isCalibrationMode && calibrationTap != null) {
                             val (x, y) = calibrationTap!!
+                            val (absX, absY) = MapCoordinates.toAbsolute(x, y, w.value, h.value)
                             MapPinBase(
                                 color = Color.Black,
                                 label = "Tap",
@@ -194,9 +255,10 @@ fun MapScreen(
                                 isSelected = true,
                                 onClick = {},
                                 modifier = Modifier.offset(
-                                    x = w * x,
-                                    y = h * y
-                                )
+                                    x = absX.dp,
+                                    y = absY.dp
+                                ),
+                                isEditorMode = false
                             )
                         }
                     }
@@ -260,8 +322,49 @@ fun MapScreen(
             }
 
             if (isEditMode) {
-                EditorToolbar(viewModel = editorViewModel)
+                Box(modifier = Modifier.fillMaxWidth().weight(0.25f, fill = false)) {
+                    EditorToolbar(viewModel = editorViewModel)
+                }
             }
+        }
+        
+        if (showValidate) {
+            AlertDialog(
+                onDismissRequest = { showValidate = false },
+                title = { Text("Validation Report") },
+                text = {
+                    val report = editorViewModel.getValidationReport()
+                    Column {
+                        Text("Nodes: ${report.nodeCount}, Edges: ${report.edgeCount}")
+                        Text("Connected Groups: ${report.connectedGroupsCount}" + if (report.connectedGroupsCount > 1) " (WARNING!)" else "")
+                        Text("Nodes without edges: ${report.nodesWithNoEdges.size}")
+                        Text("Locations missing entry nodes: ${report.missingLocationIds.size}")
+                    }
+                },
+                confirmButton = { Button(onClick = { showValidate = false }) { Text("OK") } }
+            )
+        }
+
+        if (showClearConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearConfirm = false },
+                title = { Text("Clear all nodes?") },
+                text = { Text("This will delete all nodes and edges from the draft. It will not delete assets/graph.json.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            editorViewModel.clearAll()
+                            showClearConfirm = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Clear All")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                }
+            )
         }
 
         selectedLocation?.let { loc ->

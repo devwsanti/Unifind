@@ -27,12 +27,17 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unifind.UniFindApplication
 import com.example.unifind.routing.CampusGraph
 import com.example.unifind.routing.DijkstraRouteFinder
 import com.example.unifind.routing.RoutePlanner
 import com.example.unifind.routing.RouteResult
+import com.example.unifind.ui.map.MapCoordinates
 
 @Composable
 fun EditorOverlay(
@@ -49,67 +54,77 @@ fun EditorOverlay(
     val nodes = state.nodes
     val edges = state.edges
 
-    // Draw edges
+    // Draw edges (Canvas works in PIXELS, container sizes are in DP -> multiply by density)
     Canvas(modifier = Modifier.fillMaxSize()) {
         val strokeW = 3.dp.toPx() / scale
+        val outlineW = strokeW + (2.dp.toPx() / scale)
+        val widthPx = containerWidth * density
+        val heightPx = containerHeight * density
+
         for (edge in edges) {
             val n1 = nodes.find { it.id == edge.first }
             val n2 = nodes.find { it.id == edge.second }
             if (n1 == null || n2 == null) continue
-            
-            // Draw thin white outline
-            drawLine(
-                color = Color.White,
-                start = Offset(n1.mapX * containerWidth, n1.mapY * containerHeight),
-                end = Offset(n2.mapX * containerWidth, n2.mapY * containerHeight),
-                strokeWidth = strokeW + (2.dp.toPx() / scale)
-            )
-            // Draw orange core
-            drawLine(
-                color = Color(0xFFFFA500),
-                start = Offset(n1.mapX * containerWidth, n1.mapY * containerHeight),
-                end = Offset(n2.mapX * containerWidth, n2.mapY * containerHeight),
-                strokeWidth = strokeW
-            )
+
+            val start = Offset(n1.mapX * widthPx, n1.mapY * heightPx)
+            val end = Offset(n2.mapX * widthPx, n2.mapY * heightPx)
+
+            // Thin white outline
+            drawLine(color = Color.White, start = start, end = end, strokeWidth = outlineW)
+            // Orange core
+            drawLine(color = Color(0xFFFFA500), start = start, end = end, strokeWidth = strokeW)
         }
     }
 
-    // Draw nodes
+    // Draw nodes (32dp touch target, 8/14dp visible dot)
+    val dens = LocalDensity.current.density
     for (node in nodes) {
-        val isSelected = node.id == selectedNodeId
-        val baseSize = if (isSelected) 14.dp else 8.dp
+        key(node.id) {
+            val currentNode by rememberUpdatedState(node)
+            val isSelected = node.id == selectedNodeId
+            val dotSize = if (isSelected) 14.dp else 8.dp
 
-        Box(
-            modifier = Modifier
-                .offset(
-                    x = (node.mapX * containerWidth).dp - (baseSize / 2),
-                    y = (node.mapY * containerHeight).dp - (baseSize / 2)
-                )
-                .graphicsLayer(
-                    scaleX = 1f / scale,
-                    scaleY = 1f / scale,
-                    transformOrigin = TransformOrigin(0.5f, 0.5f)
-                )
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = (node.mapX * containerWidth).dp - 16.dp,
+                        y = (node.mapY * containerHeight).dp - 16.dp
+                    )
+                    .size(32.dp)
+                    .graphicsLayer(
+                        scaleX = 1f / scale,
+                        scaleY = 1f / scale,
+                        transformOrigin = TransformOrigin(0.5f, 0.5f)
+                    )
+                    .pointerInput(node.id, scale) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            // dragAmount is in screen pixels; the map is zoomed by `scale`
+                            // and containerWidth/Height are in dp.
+                            val dxDp = dragAmount.x / (dens * scale)
+                            val dyDp = dragAmount.y / (dens * scale)
+                            val n = currentNode
+                            val newX = (n.mapX + dxDp / containerWidth).coerceIn(0f, 1f)
+                            val newY = (n.mapY + dyDp / containerHeight).coerceIn(0f, 1f)
+                            viewModel.handleNodeDrag(n.id, newX, newY)
+                        }
+                    }
+                    .clickable { viewModel.handleNodeTap(node.id) },
+                contentAlignment = Alignment.Center
+            ) {
                 Box(
                     modifier = Modifier
-                        .size(baseSize)
+                        .size(dotSize)
                         .clip(CircleShape)
                         .background(if (node.locationId != null) Color.Green else Color.DarkGray)
                         .border(1.dp, Color.White, CircleShape)
-                        .then(if (isSelected) Modifier.border(2.dp, Color.Black, CircleShape) else Modifier)
-                        .pointerInput(node.id) {
-                            detectDragGestures { change, dragAmount ->
-                                change.consume()
-                                // Convert dragAmount back to 0..1 relative to container
-                                // But dragAmount is in unscaled pixels? Yes, because we consume it here before ZoomableMap
-                                val newX = (node.mapX * containerWidth + dragAmount.x) / containerWidth
-                                val newY = (node.mapY * containerHeight + dragAmount.y) / containerHeight
-                                viewModel.handleNodeDrag(node.id, newX, newY)
-                            }
-                        }
-                        .clickable { viewModel.handleNodeTap(node.id) }
+                        .then(
+                            if (isSelected) Modifier.border(
+                                2.dp,
+                                Color.Black,
+                                CircleShape
+                            ) else Modifier
+                        )
                 )
                 if (scale >= 2.5f || isSelected) {
                     Text(
@@ -117,6 +132,9 @@ fun EditorOverlay(
                         color = Color.Black,
                         fontSize = 10.sp,
                         modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = 28.dp)
+                            .wrapContentWidth(unbounded = true)
                             .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
                             .padding(2.dp)
                     )
@@ -150,12 +168,19 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                 FilterChip(
                     selected = currentTool == tool,
                     onClick = { viewModel.setTool(tool) },
-                    label = { Text(tool.name, fontSize = 10.sp, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
+                    label = {
+                        Text(
+                            tool.name,
+                            fontSize = 10.sp,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    },
                     modifier = Modifier.padding(horizontal = 2.dp)
                 )
             }
         }
-        
+
         // Row 2: Actions
         Row(
             modifier = Modifier
@@ -163,12 +188,31 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                 .padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(onClick = { viewModel.undo() }) { Text("Undo", fontSize = 10.sp, maxLines = 1) }
-            TextButton(onClick = { /* TODO Test */ }) { Text("Test", fontSize = 10.sp, maxLines = 1) }
-            TextButton(onClick = { showValidate = true }) { Text("Validate", fontSize = 10.sp, maxLines = 1) }
+            TextButton(onClick = { viewModel.undo() }) {
+                Text(
+                    "Undo",
+                    fontSize = 10.sp,
+                    maxLines = 1
+                )
+            }
+            TextButton(onClick = { /* TODO Test */ }) {
+                Text(
+                    "Test",
+                    fontSize = 10.sp,
+                    maxLines = 1
+                )
+            }
+            TextButton(onClick = { showValidate = true }) {
+                Text(
+                    "Validate",
+                    fontSize = 10.sp,
+                    maxLines = 1
+                )
+            }
             TextButton(onClick = {
                 val json = viewModel.getJson()
-                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard =
+                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("Graph JSON", json))
             }) { Text("Copy", fontSize = 10.sp, maxLines = 1) }
             TextButton(onClick = {

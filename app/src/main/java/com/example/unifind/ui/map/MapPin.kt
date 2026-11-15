@@ -72,7 +72,7 @@ fun MapPinBase(
 ) {
     val heightDp = if (isSelected) 31.dp else 24.dp
     val widthDp = heightDp * 0.7f
-    val alpha = if (isEditorMode) 0.5f else 1f
+    val alpha = if (isEditorMode) 0.4f else 1f
 
     // Wrapper anchoring the map-coordinate point 1:1 on layout
     Box(modifier = modifier) {

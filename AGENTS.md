@@ -15,3 +15,9 @@
 ## Style
 - Keep code simple and readable, because I must explain it to my professor
 - UI strings in English
+
+## Editing rules for the agent
+- Edit source files with the IDE editing tools. Do NOT use shell commands
+  (Set-Content, python, sed) to rewrite source files.
+- Do one small task per prompt. Do not scan the whole project.
+- After the change, run only the build and the relevant tests.

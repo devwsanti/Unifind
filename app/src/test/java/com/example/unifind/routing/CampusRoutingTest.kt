@@ -18,7 +18,7 @@ class CampusRoutingTest {
 
     // Distances (width = 100, height = 100, mpp = 1.0)
     // A to B: 50m
-    // A to C: 50m
+    // A to C: 50m3
     // B to D: 50m
     // C to D: 50m
 
