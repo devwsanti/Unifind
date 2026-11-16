@@ -23,7 +23,6 @@ import androidx.navigation.navArgument
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.navigation.NavType
 import com.example.unifind.ui.detail.BuildingDetailScreen
 import com.example.unifind.ui.directions.DirectionsScreen
@@ -35,7 +34,7 @@ import com.example.unifind.ui.search.SearchScreen
 fun AppNavigation() {
     val navController = rememberNavController()
     var isEditMode by remember { mutableStateOf(false) }
-    
+
     val items = listOf(
         Screen.Home,
         Screen.Search,
@@ -58,7 +57,11 @@ fun AppNavigation() {
                                 label = { Text(screen.label, maxLines = 1, softWrap = false, fontSize = 11.sp) },
                                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                                 onClick = {
-                                    val route = if (screen == Screen.Map) "map?locationId=" else screen.route
+                                    val route = when (screen) {
+                                        Screen.Map -> "map?locationId="
+                                        Screen.Directions -> "directions"
+                                        else -> screen.route
+                                    }
                                     navController.navigate(route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
                                             saveState = true
@@ -90,7 +93,7 @@ fun AppNavigation() {
                     }
                 )
             }
-            composable(Screen.Search.route) { 
+            composable(Screen.Search.route) {
                 SearchScreen(
                     onResultClick = { locationId, floorLabel, roomId ->
                         if (roomId != null) {
@@ -103,13 +106,13 @@ fun AppNavigation() {
                             }
                         }
                     }
-                ) 
+                )
             }
             composable(
                 route = Screen.Map.route,
-                arguments = listOf(navArgument("locationId") { 
-                    type = NavType.StringType 
-                    nullable = true 
+                arguments = listOf(navArgument("locationId") {
+                    type = NavType.StringType
+                    nullable = true
                 })
             ) { backStackEntry ->
                 val locationId = backStackEntry.arguments?.getString("locationId")
@@ -120,7 +123,16 @@ fun AppNavigation() {
                     navController = navController
                 )
             }
-            composable(Screen.Directions.route) { DirectionsScreen() }
+            composable(
+                route = Screen.Directions.route,
+                arguments = listOf(navArgument("toLocationId") {
+                    type = NavType.StringType
+                    nullable = true
+                })
+            ) { backStackEntry ->
+                val toLocationId = backStackEntry.arguments?.getString("toLocationId")
+                DirectionsScreen(toLocationId = toLocationId)
+            }
             composable(
                 route = "building/{id}?floor={floor}&roomId={roomId}",
                 arguments = listOf(
@@ -138,6 +150,12 @@ fun AppNavigation() {
                     roomId = roomId,
                     onShowOnMap = { locId ->
                         navController.navigate(Screen.Map.createRoute(locId)) {
+                            popUpTo(navController.graph.findStartDestination().id)
+                            launchSingleTop = true
+                        }
+                    },
+                    onDirections = { locId ->
+                        navController.navigate(Screen.Directions.createRoute(locId)) {
                             popUpTo(navController.graph.findStartDestination().id)
                             launchSingleTop = true
                         }

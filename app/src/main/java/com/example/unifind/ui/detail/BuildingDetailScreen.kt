@@ -46,6 +46,7 @@ fun BuildingDetailScreen(
     floorLabel: String?,
     roomId: String?,
     onShowOnMap: (String) -> Unit,
+    onDirections: (String) -> Unit,
     viewModel: BuildingDetailViewModel = viewModel()
 ) {
     LaunchedEffect(buildingId, floorLabel, roomId) {
@@ -83,7 +84,7 @@ fun BuildingDetailScreen(
                 Button(onClick = { onShowOnMap(b.id) }, modifier = Modifier.weight(1f)) {
                     Text("Show on map")
                 }
-                Button(onClick = {}, enabled = false, modifier = Modifier.weight(1f)) {
+                Button(onClick = { onDirections(b.id) }, modifier = Modifier.weight(1f)) {
                     Text("Directions")
                 }
             }

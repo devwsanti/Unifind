@@ -24,12 +24,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.unifind.BuildConfig
 import com.example.unifind.model.Building
 import com.example.unifind.ui.map.editor.EditorOverlay
 import com.example.unifind.ui.map.editor.EditorToolbar
 import com.example.unifind.ui.map.editor.GraphEditorViewModel
+import com.example.unifind.ui.navigation.Screen
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +55,7 @@ fun MapScreen(
     var calibrationTap by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var legendExpanded by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
-    
+
     val editorUpdateTrigger by editorViewModel.updateTrigger.collectAsState()
     var showValidate by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -217,32 +219,32 @@ fun MapScreen(
                         val h = maxHeight
 
                         placedLocations.forEach { loc ->
-                        val (absX, absY) = MapCoordinates.toAbsolute(loc.mapX, loc.mapY, w.value, h.value)
-                        MapPin(
-                            location = loc,
-                            scale = scale,
-                            isSelected = loc.id == selectedLocation?.id,
-                            onClick = {
-                                if (!isCalibrationMode && !isEditMode) {
-                                    viewModel.selectLocation(loc)
-                                }
-                            },
-                            modifier = Modifier.offset(
-                                x = absX.dp,
-                                y = absY.dp
-                            ),
-                            isEditorMode = isEditMode
-                        )
-                    }
+                            val (absX, absY) = MapCoordinates.toAbsolute(loc.mapX, loc.mapY, w.value, h.value)
+                            MapPin(
+                                location = loc,
+                                scale = scale,
+                                isSelected = loc.id == selectedLocation?.id,
+                                onClick = {
+                                    if (!isCalibrationMode && !isEditMode) {
+                                        viewModel.selectLocation(loc)
+                                    }
+                                },
+                                modifier = Modifier.offset(
+                                    x = absX.dp,
+                                    y = absY.dp
+                                ),
+                                isEditorMode = isEditMode
+                            )
+                        }
 
-                    if (isEditMode) {
-                        EditorOverlay(
-                            scale = scale,
-                            containerWidth = w.value,
-                            containerHeight = h.value,
-                            viewModel = editorViewModel
-                        )
-                    }
+                        if (isEditMode) {
+                            EditorOverlay(
+                                scale = scale,
+                                containerWidth = w.value,
+                                containerHeight = h.value,
+                                viewModel = editorViewModel
+                            )
+                        }
 
                         // Show temporary pin for calibration mode
                         if (isCalibrationMode && calibrationTap != null) {
@@ -327,7 +329,7 @@ fun MapScreen(
                 }
             }
         }
-        
+
         if (showValidate) {
             AlertDialog(
                 onDismissRequest = { showValidate = false },
@@ -399,11 +401,16 @@ fun MapScreen(
                             }
                         }
                         Button(
-                            onClick = { },
-                            enabled = false,
+                            onClick = {
+                                navController.navigate(Screen.Directions.createRoute(loc.id)) {
+                                    popUpTo(navController.graph.findStartDestination().id)
+                                    launchSingleTop = true
+                                }
+                                viewModel.selectLocation(null)
+                            },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Directions (Coming soon)", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text("Directions", maxLines = 1, overflow = TextOverflow.Ellipsis)
                         }
                     }
                     Spacer(modifier = Modifier.height(32.dp))

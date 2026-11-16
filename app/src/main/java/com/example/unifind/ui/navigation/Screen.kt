@@ -17,5 +17,7 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
     object Map : Screen("map?locationId={locationId}", "Map", Icons.Filled.LocationOn) {
         fun createRoute(locationId: String) = "map?locationId=$locationId"
     }
-    object Directions : Screen("directions", "Directions",    Icons.AutoMirrored.Filled.ArrowForward)
+    object Directions : Screen("directions?toLocationId={toLocationId}", "Directions", Icons.AutoMirrored.Filled.ArrowForward) {
+        fun createRoute(toLocationId: String) = "directions?toLocationId=$toLocationId"
+    }
 }
