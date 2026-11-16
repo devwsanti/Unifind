@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,6 +29,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.unifind.BuildConfig
 import com.example.unifind.model.Building
+import com.example.unifind.ui.location.CurrentLocationHolder
 import com.example.unifind.ui.map.editor.EditorOverlay
 import com.example.unifind.ui.map.editor.EditorToolbar
 import com.example.unifind.ui.map.editor.GraphEditorViewModel
@@ -38,16 +40,20 @@ import java.util.Locale
 @Composable
 fun MapScreen(
     locationId: String? = null,
+    openImHere: Boolean = false,
     isEditMode: Boolean = false,
     onEditModeChange: (Boolean) -> Unit = {},
     navController: NavController = rememberNavController(),
     viewModel: MapViewModel = viewModel(),
-    editorViewModel: GraphEditorViewModel = viewModel()
+    editorViewModel: GraphEditorViewModel = viewModel(),
+    currentLocationHolder: CurrentLocationHolder = viewModel()
 ) {
     val selectedLocation by viewModel.selectedLocation.collectAsState()
     val isCalibrationMode by viewModel.isCalibrationMode.collectAsState()
     val placedLocations = viewModel.placedLocations
     val allLocationsCount = viewModel.allLocations.size
+
+    val myLocation by currentLocationHolder.myLocation.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -56,9 +62,20 @@ fun MapScreen(
     var legendExpanded by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
 
+    var showImHereSheet by remember { mutableStateOf(false) }
+    var isPlacingLocationOnMap by remember { mutableStateOf(false) }
+    var showPlacePicker by remember { mutableStateOf(false) }
+    var customFocusTarget by remember { mutableStateOf<Pair<Float, Float>?>(null) }
+
     val editorUpdateTrigger by editorViewModel.updateTrigger.collectAsState()
     var showValidate by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(openImHere) {
+        if (openImHere) {
+            showImHereSheet = true
+        }
+    }
 
     LaunchedEffect(locationId) {
         if (locationId != null) {
@@ -208,11 +225,14 @@ fun MapScreen(
                             editorViewModel.handleMapTap(x, y)
                         } else if (isCalibrationMode) {
                             calibrationTap = Pair(x, y)
+                        } else if (isPlacingLocationOnMap) {
+                            currentLocationHolder.setLocation(x, y, "Selected position")
+                            isPlacingLocationOnMap = false
                         }
                     },
-                    focusTarget = if (locationId != null && selectedLocation != null && selectedLocation!!.mapX > 0f)
+                    focusTarget = customFocusTarget ?: (if (locationId != null && selectedLocation != null && selectedLocation!!.mapX > 0f)
                         Pair(selectedLocation!!.mapX, selectedLocation!!.mapY)
-                    else null
+                    else null)
                 ) { scale ->
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val w = maxWidth
@@ -225,7 +245,7 @@ fun MapScreen(
                                 scale = scale,
                                 isSelected = loc.id == selectedLocation?.id,
                                 onClick = {
-                                    if (!isCalibrationMode && !isEditMode) {
+                                    if (!isCalibrationMode && !isEditMode && !isPlacingLocationOnMap) {
                                         viewModel.selectLocation(loc)
                                     }
                                 },
@@ -234,6 +254,18 @@ fun MapScreen(
                                     y = absY.dp
                                 ),
                                 isEditorMode = isEditMode
+                            )
+                        }
+
+                        myLocation?.let { loc ->
+                            val (absX, absY) = MapCoordinates.toAbsolute(loc.mapX, loc.mapY, w.value, h.value)
+                            MyLocationDot(
+                                scale = scale,
+                                label = "You are here",
+                                modifier = Modifier.offset(
+                                    x = absX.dp,
+                                    y = absY.dp
+                                )
                             )
                         }
 
@@ -266,6 +298,25 @@ fun MapScreen(
                     }
                 }
 
+                if (isPlacingLocationOnMap) {
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Tap where you are", style = MaterialTheme.typography.bodyMedium)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(onClick = { isPlacingLocationOnMap = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    }
+                }
+
                 if (!isEditMode) {
                     Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                         Card {
@@ -292,6 +343,40 @@ fun MapScreen(
                                 }
                             }
                         }
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (myLocation != null) {
+                            SmallFloatingActionButton(
+                                onClick = {
+                                    val loc = myLocation
+                                    if (loc != null) {
+                                        customFocusTarget = Pair(loc.mapX, loc.mapY)
+                                    }
+                                }
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.LocationOn, contentDescription = "Center on me")
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Center on me")
+                                }
+                            }
+                        }
+
+                        ExtendedFloatingActionButton(
+                            onClick = { showImHereSheet = true },
+                            icon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                            text = { Text("I'm here") }
+                        )
                     }
                 }
 
@@ -367,6 +452,71 @@ fun MapScreen(
                     TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
                 }
             )
+        }
+
+        if (showImHereSheet) {
+            ModalBottomSheet(onDismissRequest = { showImHereSheet = false }) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Set my location", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ListItem(
+                        headlineContent = { Text("Tap on the map") },
+                        modifier = Modifier.clickable {
+                            showImHereSheet = false
+                            isPlacingLocationOnMap = true
+                        }
+                    )
+                    ListItem(
+                        headlineContent = { Text("Choose a place") },
+                        modifier = Modifier.clickable {
+                            showImHereSheet = false
+                            showPlacePicker = true
+                        }
+                    )
+                    if (myLocation != null) {
+                        ListItem(
+                            headlineContent = { Text("Clear my location", color = MaterialTheme.colorScheme.error) },
+                            modifier = Modifier.clickable {
+                                currentLocationHolder.clearLocation()
+                                showImHereSheet = false
+                            }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+        }
+
+        if (showPlacePicker) {
+            var searchQuery by remember { mutableStateOf("") }
+            val filteredLocations = viewModel.allLocations.filter {
+                it.name.contains(searchQuery, ignoreCase = true)
+            }
+            ModalBottomSheet(onDismissRequest = { showPlacePicker = false }) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Choose a place", style = MaterialTheme.typography.titleLarge)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search location") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
+                        items(filteredLocations) { loc ->
+                            ListItem(
+                                headlineContent = { Text(loc.name) },
+                                modifier = Modifier.clickable {
+                                    currentLocationHolder.setLocation(loc.mapX, loc.mapY, "Near ${loc.name}")
+                                    showPlacePicker = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         selectedLocation?.let { loc ->

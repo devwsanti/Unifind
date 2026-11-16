@@ -11,4 +11,12 @@ class RouteSummaryFormatterTest {
         assertEquals("Approx. 5 m - about 1 min walk", RouteSummaryFormatter.formatSummary(4.0))
         assertEquals("Approx. 85 m - about 2 min walk", RouteSummaryFormatter.formatSummary(84.0))
     }
+
+    @Test
+    fun testFormatDistance() {
+        assertEquals(180, RouteSummaryFormatter.formatDistance(182.0))
+        assertEquals(0, RouteSummaryFormatter.formatDistance(0.0))
+        assertEquals(5, RouteSummaryFormatter.formatDistance(4.0))
+        assertEquals(85, RouteSummaryFormatter.formatDistance(84.0))
+    }
 }

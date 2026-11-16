@@ -11,7 +11,9 @@ class CampusGraph(
     val edges: List<Pair<String, String>>,
     val imageWidth: Int,
     val imageHeight: Int,
-    val metersPerPixel: Double
+    val metersPerPixel: Double,
+    penalizedEdges: Set<Pair<String, String>> = emptySet(),
+    penaltyFactor: Double = 3.0
 ) {
     private val nodeMap: Map<String, WaypointNode>
     private val adjacencyList: Map<String, List<Pair<WaypointNode, Double>>>
@@ -27,7 +29,11 @@ class CampusGraph(
         for (edge in edges) {
             val u = nodeMap[edge.first] ?: throw IllegalArgumentException("Edge references unknown node: ${edge.first}")
             val v = nodeMap[edge.second] ?: throw IllegalArgumentException("Edge references unknown node: ${edge.second}")
-            val dist = distanceMeters(u.mapX, u.mapY, v.mapX, v.mapY)
+            var dist = distanceMeters(u.mapX, u.mapY, v.mapX, v.mapY)
+            val isPenalized = penalizedEdges.contains(Pair(u.id, v.id)) || penalizedEdges.contains(Pair(v.id, u.id))
+            if (isPenalized) {
+                dist *= penaltyFactor
+            }
             adj[u.id]?.add(Pair(v, dist))
             adj[v.id]?.add(Pair(u, dist))
         }
@@ -51,5 +57,9 @@ class CampusGraph(
         val dx = (mapX1 - mapX2) * imageWidth
         val dy = (mapY1 - mapY2) * imageHeight
         return hypot(dx.toDouble(), dy.toDouble()) * metersPerPixel
+    }
+
+    fun withPenalizedEdges(penalizedEdges: Set<Pair<String, String>>, penaltyFactor: Double = 3.0): CampusGraph {
+        return CampusGraph(nodes, edges, imageWidth, imageHeight, metersPerPixel, penalizedEdges, penaltyFactor)
     }
 }

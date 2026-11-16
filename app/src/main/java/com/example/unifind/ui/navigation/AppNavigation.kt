@@ -24,9 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unifind.ui.detail.BuildingDetailScreen
 import com.example.unifind.ui.directions.DirectionsScreen
 import com.example.unifind.ui.home.HomeScreen
+import com.example.unifind.ui.location.CurrentLocationHolder
 import com.example.unifind.ui.map.MapScreen
 import com.example.unifind.ui.search.SearchScreen
 
@@ -34,6 +37,7 @@ import com.example.unifind.ui.search.SearchScreen
 fun AppNavigation() {
     val navController = rememberNavController()
     var isEditMode by remember { mutableStateOf(false) }
+    val currentLocationHolder: CurrentLocationHolder = viewModel()
 
     val items = listOf(
         Screen.Home,
@@ -110,17 +114,20 @@ fun AppNavigation() {
             }
             composable(
                 route = Screen.Map.route,
-                arguments = listOf(navArgument("locationId") {
-                    type = NavType.StringType
-                    nullable = true
-                })
+                arguments = listOf(
+                    navArgument("locationId") { type = NavType.StringType; nullable = true },
+                    navArgument("openImHere") { type = NavType.BoolType; defaultValue = false }
+                )
             ) { backStackEntry ->
                 val locationId = backStackEntry.arguments?.getString("locationId")
+                val openImHere = backStackEntry.arguments?.getBoolean("openImHere") ?: false
                 MapScreen(
                     locationId = locationId,
+                    openImHere = openImHere,
                     isEditMode = isEditMode,
                     onEditModeChange = { isEditMode = it },
-                    navController = navController
+                    navController = navController,
+                    currentLocationHolder = currentLocationHolder
                 )
             }
             composable(
@@ -131,7 +138,11 @@ fun AppNavigation() {
                 })
             ) { backStackEntry ->
                 val toLocationId = backStackEntry.arguments?.getString("toLocationId")
-                DirectionsScreen(toLocationId = toLocationId)
+                DirectionsScreen(
+                    toLocationId = toLocationId,
+                    navController = navController,
+                    currentLocationHolder = currentLocationHolder
+                )
             }
             composable(
                 route = "building/{id}?floor={floor}&roomId={roomId}",

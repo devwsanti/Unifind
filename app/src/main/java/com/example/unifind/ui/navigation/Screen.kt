@@ -14,8 +14,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     object Home : Screen("home", "Home", Icons.Filled.Home)
     object Search : Screen("search", "Search", Icons.Filled.Search)
-    object Map : Screen("map?locationId={locationId}", "Map", Icons.Filled.LocationOn) {
-        fun createRoute(locationId: String) = "map?locationId=$locationId"
+    object Map : Screen("map?locationId={locationId}&openImHere={openImHere}", "Map", Icons.Filled.LocationOn) {
+        fun createRoute(locationId: String? = null, openImHere: Boolean = false): String {
+            val params = mutableListOf<String>()
+            if (locationId != null) params.add("locationId=$locationId")
+            if (openImHere) params.add("openImHere=true")
+            return if (params.isNotEmpty()) "map?${params.joinToString("&")}" else "map"
+        }
     }
     object Directions : Screen("directions?toLocationId={toLocationId}", "Directions", Icons.AutoMirrored.Filled.ArrowForward) {
         fun createRoute(toLocationId: String) = "directions?toLocationId=$toLocationId"
