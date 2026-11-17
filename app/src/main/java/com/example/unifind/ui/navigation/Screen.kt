@@ -13,7 +13,14 @@ import androidx.compose.ui.graphics.vector.ImageVector
  */
 sealed class Screen(val route: String, val label: String, val icon: ImageVector) {
     object Home : Screen("home", "Home", Icons.Filled.Home)
-    object Search : Screen("search", "Search", Icons.Filled.Search)
+    object Search : Screen("search?filter={filter}&query={query}", "Search", Icons.Filled.Search) {
+        fun createRoute(filter: String? = null, query: String? = null): String {
+            val params = mutableListOf<String>()
+            if (filter != null) params.add("filter=$filter")
+            if (query != null) params.add("query=$query")
+            return if (params.isNotEmpty()) "search?${params.joinToString("&")}" else "search"
+        }
+    }
     object Map : Screen("map?locationId={locationId}&openImHere={openImHere}", "Map", Icons.Filled.LocationOn) {
         fun createRoute(locationId: String? = null, openImHere: Boolean = false): String {
             val params = mutableListOf<String>()

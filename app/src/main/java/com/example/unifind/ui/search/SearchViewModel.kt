@@ -27,6 +27,15 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
     private val _results = MutableStateFlow<List<SearchResult>>(emptyList())
     val results: StateFlow<List<SearchResult>> = _results.asStateFlow()
 
+    fun applyInitialState(filterName: String?, queryStr: String?) {
+        val locationType = filterName?.let { name ->
+            runCatching { LocationType.valueOf(name) }.getOrNull()
+        }
+        _filter.update { locationType }
+        _query.update { queryStr ?: "" }
+        executeSearch()
+    }
+
     fun updateQuery(newQuery: String) {
         _query.update { newQuery }
         executeSearch()
@@ -42,12 +51,16 @@ class SearchViewModel(application: Application) : AndroidViewModel(application) 
         val currentFilter = _filter.value
 
         var newResults = if (currentQuery.isBlank()) {
-            emptyList()
+            if (currentFilter != null) {
+                searchEngine.filterByType(currentFilter)
+            } else {
+                emptyList()
+            }
         } else {
             searchEngine.search(currentQuery)
         }
 
-        if (currentFilter != null) {
+        if (currentFilter != null && currentQuery.isNotBlank()) {
             newResults = newResults.filter { result ->
                 when (currentFilter) {
                     LocationType.GATE -> result.location is com.example.unifind.model.Gate && result.room == null

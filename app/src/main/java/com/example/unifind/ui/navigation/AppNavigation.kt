@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.unifind.ui.detail.BuildingDetailScreen
 import com.example.unifind.ui.directions.DirectionsScreen
@@ -88,8 +87,16 @@ fun AppNavigation() {
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
-                    onSearchClick = {
-                        navController.navigate(Screen.Search.route) {
+                    onSearchClick = { filter, query ->
+                        val route = Screen.Search.createRoute(filter = filter?.name, query = query)
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onDirectionsClick = {
+                        navController.navigate(Screen.Directions.route) {
                             popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
@@ -97,8 +104,18 @@ fun AppNavigation() {
                     }
                 )
             }
-            composable(Screen.Search.route) {
+            composable(
+                route = Screen.Search.route,
+                arguments = listOf(
+                    navArgument("filter") { type = NavType.StringType; nullable = true },
+                    navArgument("query") { type = NavType.StringType; nullable = true }
+                )
+            ) { backStackEntry ->
+                val filterArg = backStackEntry.arguments?.getString("filter")
+                val queryArg = backStackEntry.arguments?.getString("query")
                 SearchScreen(
+                    initialFilter = filterArg,
+                    initialQuery = queryArg,
                     onResultClick = { locationId, floorLabel, roomId ->
                         if (roomId != null) {
                             navController.navigate("building/$locationId?floor=$floorLabel&roomId=$roomId")
