@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -29,8 +31,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,27 +42,20 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.unifind.BuildConfig
-import com.example.unifind.model.AccessPolicy
-import com.example.unifind.model.AppMode
+import com.example.unifind.UniFindApplication
 import com.example.unifind.model.Building
 import com.example.unifind.model.BuildingStatus
 import com.example.unifind.model.Facility
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.input.ImeAction
-import com.example.unifind.UniFindApplication
 import com.example.unifind.model.Gate
 import com.example.unifind.routing.DestinationRanker
 import com.example.unifind.routing.NearestLocationFinder
-import com.example.unifind.search.LocationType
 import com.example.unifind.routing.NearestNodeFinder
+import com.example.unifind.search.LocationType
 import com.example.unifind.ui.directions.RouteSummaryFormatter
 import com.example.unifind.ui.location.CurrentLocationHolder
 import com.example.unifind.ui.map.editor.EditorOverlay
 import com.example.unifind.ui.map.editor.EditorToolbar
 import com.example.unifind.ui.map.editor.GraphEditorViewModel
-import com.example.unifind.ui.mode.AppModeHolder
 import com.example.unifind.ui.navigation.Screen
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -76,17 +73,6 @@ fun MapScreen(
     editorViewModel: GraphEditorViewModel = viewModel(),
     currentLocationHolder: CurrentLocationHolder = viewModel()
 ) {
-    val appMode by AppModeHolder.mode.collectAsState()
-    val accessPolicy = remember(appMode) { AccessPolicy(appMode) }
-    val canEdit = accessPolicy.canEditPaths()
-    val effectiveEditMode = isEditMode && canEdit
-
-    LaunchedEffect(canEdit, isEditMode) {
-        if (isEditMode && !canEdit) {
-            onEditModeChange(false)
-        }
-    }
-
     val selectedLocation by viewModel.selectedLocation.collectAsState()
     val isCalibrationMode by viewModel.isCalibrationMode.collectAsState()
     val placedLocations = viewModel.placedLocations
@@ -140,7 +126,7 @@ fun MapScreen(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            if (effectiveEditMode) {
+            if (isEditMode) {
                 val trigger = editorUpdateTrigger
                 var editorMenuExpanded by remember { mutableStateOf(false) }
                 TopAppBar(
@@ -213,66 +199,53 @@ fun MapScreen(
             } else {
                 TopAppBar(
                     title = {
-                        if (appMode is AppMode.Developer) {
-                            Column {
-                                Text("Campus Map", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(
-                                    text = "${placedLocations.size} of $allLocationsCount locations placed",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        } else {
+                        Column {
                             Text("Campus Map", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(
+                                text = "${placedLocations.size} of $allLocationsCount locations placed",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     },
                     actions = {
-                        if (appMode is AppMode.Developer) {
-                            var showDevMenu by remember { mutableStateOf(false) }
-                            Box(modifier = Modifier.padding(end = 4.dp)) {
-                                AssistChip(
-                                    onClick = { showDevMenu = true },
-                                    label = { Text("Developer mode", style = MaterialTheme.typography.labelSmall) },
-                                    modifier = Modifier.semantics { contentDescription = "Developer mode chip" }
-                                )
-                                DropdownMenu(
-                                    expanded = showDevMenu,
-                                    onDismissRequest = { showDevMenu = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Exit developer mode") },
-                                        onClick = {
-                                            AppModeHolder.lock()
-                                            showDevMenu = false
-                                        }
-                                    )
-                                }
+                        Box {
+                            IconButton(onClick = { menuExpanded = true }) {
+                                Icon(Icons.Default.MoreVert, contentDescription = "Mode Selector")
                             }
-                            Box {
-                                IconButton(onClick = { menuExpanded = true }) {
-                                    Icon(Icons.Default.MoreVert, contentDescription = "Mode Selector")
-                                }
-                                DropdownMenu(
-                                    expanded = menuExpanded,
-                                    onDismissRequest = { menuExpanded = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Edit paths", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                        onClick = {
-                                            if (isCalibrationMode) viewModel.toggleCalibrationMode()
-                                            onEditModeChange(true)
-                                            menuExpanded = false
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("Validate graph", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                        onClick = {
-                                            showValidate = true
-                                            menuExpanded = false
-                                        }
-                                    )
-                                }
+                            DropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = if (isCalibrationMode) "View mode" else "Calibrate mode",
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    },
+                                    onClick = {
+                                        viewModel.toggleCalibrationMode()
+                                        menuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Edit paths", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        if (isCalibrationMode) viewModel.toggleCalibrationMode()
+                                        onEditModeChange(true)
+                                        menuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Validate graph", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = {
+                                        showValidate = true
+                                        menuExpanded = false
+                                    }
+                                )
                             }
                         }
                     }
@@ -288,7 +261,7 @@ fun MapScreen(
             Box(modifier = Modifier.weight(1f)) {
                 ZoomableMap(
                     onMapTap = { x, y ->
-                        if (effectiveEditMode) {
+                        if (isEditMode) {
                             editorViewModel.handleMapTap(x, y)
                         } else if (isCalibrationMode) {
                             calibrationTap = Pair(x, y)
@@ -319,7 +292,7 @@ fun MapScreen(
                                 scale = scale,
                                 isSelected = loc.id == selectedLocation?.id,
                                 onClick = {
-                                    if (!isCalibrationMode && !effectiveEditMode && !isPlacingLocationOnMap) {
+                                    if (!isCalibrationMode && !isEditMode && !isPlacingLocationOnMap) {
                                         viewModel.selectLocation(loc)
                                     }
                                 },
@@ -327,12 +300,12 @@ fun MapScreen(
                                     x = absX.dp,
                                     y = absY.dp
                                 ),
-                                isEditorMode = effectiveEditMode,
+                                isEditorMode = isEditMode,
                                 rotation = rotation
                             )
                         }
 
-                        if (!effectiveEditMode && (scale >= 2.5f || selectedLocation != null)) {
+                        if (!isEditMode && (scale >= 2.5f || selectedLocation != null)) {
                             val offsetXDp = offset.x / density
                             val offsetYDp = offset.y / density
                             val visibleMinX = (w / 2f - (w / 2f + offsetXDp) / scale).coerceAtLeast(0f)
@@ -422,7 +395,7 @@ fun MapScreen(
                             }
                         }
 
-                        if (effectiveEditMode) {
+                        if (isEditMode) {
                             EditorOverlay(
                                 scale = scale,
                                 containerWidth = w,
@@ -508,7 +481,7 @@ fun MapScreen(
                     }
                 }
 
-                if (!effectiveEditMode) {
+                if (!isEditMode) {
                     Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                         Card {
                             Column {
@@ -619,7 +592,7 @@ fun MapScreen(
                 }
             }
 
-            if (effectiveEditMode) {
+            if (isEditMode) {
                 Box(modifier = Modifier.fillMaxWidth().weight(0.25f, fill = false)) {
                     EditorToolbar(viewModel = editorViewModel)
                 }
