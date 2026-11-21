@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,7 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -22,6 +26,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.unifind.model.Building
 import com.example.unifind.model.BuildingStatus
+import com.example.unifind.model.Facility
+import com.example.unifind.model.Gate
 import com.example.unifind.model.Location
 import com.example.unifind.model.MyLocation
 import com.example.unifind.ui.location.CurrentLocationHolder
@@ -39,15 +45,20 @@ import com.example.unifind.ui.navigation.Screen
 @Composable
 fun DirectionsScreen(
     toLocationId: String? = null,
+    fromMyLocation: Boolean = false,
+    toRoomId: String? = null,
     navController: NavController = rememberNavController(),
     viewModel: DirectionsViewModel = viewModel(),
     currentLocationHolder: CurrentLocationHolder = viewModel()
 ) {
     val myLocation by currentLocationHolder.myLocation.collectAsState()
 
-    LaunchedEffect(toLocationId) {
+    LaunchedEffect(toLocationId, fromMyLocation, toRoomId) {
         if (toLocationId != null) {
-            viewModel.setToLocationById(toLocationId)
+            viewModel.setToLocationById(toLocationId, toRoomId)
+        }
+        if (fromMyLocation) {
+            viewModel.setFromMyLocation(myLocation)
         }
     }
 
@@ -57,22 +68,23 @@ fun DirectionsScreen(
 
     val fromLocation by viewModel.fromLocation.collectAsState()
     val toLocation by viewModel.toLocation.collectAsState()
+    val targetRoom by viewModel.targetRoom.collectAsState()
     val isNearestGateAuto by viewModel.isNearestGateAuto.collectAsState()
     val isFromMyLocation by viewModel.isFromMyLocation.collectAsState()
     val routeResult by viewModel.routeResult.collectAsState()
     val altRouteResult by viewModel.altRouteResult.collectAsState()
     val nearestGateResult by viewModel.nearestGateResult.collectAsState()
     val isFastestSelected by viewModel.isFastestSelected.collectAsState()
-    val allLocations = viewModel.allLocations
 
     var showFromPicker by remember { mutableStateOf(false) }
     var showToPicker by remember { mutableStateOf(false) }
 
     if (showFromPicker) {
         LocationPickerSheet(
-            locations = allLocations,
+            searchEngine = viewModel.searchEngine,
+            routePlanner = viewModel.routePlannerInstance,
             myLocation = myLocation,
-            onLocationSelected = { loc ->
+            onLocationSelected = { loc, _ ->
                 viewModel.setFromLocation(loc)
                 showFromPicker = false
             },
@@ -84,6 +96,14 @@ fun DirectionsScreen(
                 viewModel.setFromMyLocation(myLocation)
                 showFromPicker = false
             },
+            onSetOnMapSelected = {
+                showFromPicker = false
+                navController.navigate(Screen.Map.createRoute(startPlacing = true)) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
             onDismissRequest = { showFromPicker = false },
             showMyLocation = true
         )
@@ -91,20 +111,24 @@ fun DirectionsScreen(
 
     if (showToPicker) {
         LocationPickerSheet(
-            locations = allLocations,
+            searchEngine = viewModel.searchEngine,
+            routePlanner = viewModel.routePlannerInstance,
             myLocation = myLocation,
-            onLocationSelected = { loc ->
-                viewModel.setToLocation(loc)
+            onLocationSelected = { loc, room ->
+                viewModel.setToLocation(loc, room)
                 showToPicker = false
             },
             onNearestGateSelected = {},
             onMyLocationSelected = {},
+            onSetOnMapSelected = {},
             onDismissRequest = { showToPicker = false },
             showMyLocation = false
         )
     }
 
-    Scaffold { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Card(
                 modifier = Modifier
@@ -120,7 +144,11 @@ fun DirectionsScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Box(modifier = Modifier.fillMaxWidth().clickable { showFromPicker = true }) {
                             val fromText = if (isFromMyLocation) {
-                                if (myLocation != null) "My location (${myLocation?.label})" else "My location"
+                                if (myLocation != null) {
+                                    if (myLocation?.label.isNullOrBlank()) "My location" else "My location - near ${myLocation?.label}"
+                                } else {
+                                    "My location (Not set)"
+                                }
                             } else if (isNearestGateAuto) {
                                 "Nearest gate (auto)"
                             } else {
@@ -142,8 +170,13 @@ fun DirectionsScreen(
                         }
                         Spacer(Modifier.height(4.dp))
                         Box(modifier = Modifier.fillMaxWidth().clickable { showToPicker = true }) {
+                            val toText = if (targetRoom != null && toLocation != null) {
+                                "${targetRoom?.name} (${toLocation?.name})"
+                            } else {
+                                toLocation?.name ?: ""
+                            }
                             OutlinedTextField(
-                                value = toLocation?.name ?: "",
+                                value = toText,
                                 onValueChange = {},
                                 enabled = false,
                                 label = { Text("To") },
@@ -178,7 +211,7 @@ fun DirectionsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                navController.navigate(Screen.Map.createRoute(openImHere = true)) {
+                                navController.navigate(Screen.Map.createRoute(startPlacing = true)) {
                                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true
                                     restoreState = true
@@ -210,7 +243,7 @@ fun DirectionsScreen(
                     } else null
                 }
 
-                ZoomableMap(onMapTap = { _, _ -> }, focusTarget = midpoint) { scale ->
+                ZoomableMap(onMapTap = { _, _ -> }, focusTarget = midpoint, enableRotation = false) { scale, _, _ ->
                     if (currentOtherRoute != null && currentOtherRoute != currentSelectedRoute && currentOtherRoute.nodes.isNotEmpty()) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             val dashedEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 12f), 0f)
@@ -246,6 +279,7 @@ fun DirectionsScreen(
                             MyLocationDot(
                                 scale = scale,
                                 label = "You are here",
+                                nearPlace = loc.label.ifBlank { null },
                                 modifier = Modifier.offset(x = mx.dp, y = my.dp)
                             )
                         } else {
@@ -336,7 +370,8 @@ fun DirectionsScreen(
                         }
 
                         val startName = if (isFromMyLocation) {
-                            "My location (${myLocation?.label ?: ""})"
+                            val label = myLocation?.label
+                            if (!label.isNullOrBlank()) "My location - near $label" else "My location"
                         } else if (isNearestGateAuto) {
                             fromLocation?.name
                         } else {
@@ -347,7 +382,12 @@ fun DirectionsScreen(
                             "Walk about ${RouteSummaryFormatter.formatDistance(activeRoute.distanceMeters)} m",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        Text("Arrive at ${toLocation?.name ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                        val arriveText = if (targetRoom != null && toLocation != null) {
+                            "Arrive at ${targetRoom?.name} (${toLocation?.name})"
+                        } else {
+                            "Arrive at ${toLocation?.name ?: "Unknown"}"
+                        }
+                        Text(arriveText, style = MaterialTheme.typography.bodyMedium)
 
                         if (isNearestGateAuto && nearestGateResult != null) {
                             Spacer(Modifier.height(8.dp))
@@ -374,7 +414,7 @@ fun DirectionsScreen(
                 if (toLoc is Building && toLoc.status == BuildingStatus.UNDER_CONSTRUCTION) {
                     Card(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text(
-                            text = "${toLoc.name}: Coming soon",
+                            text = "Coming soon",
                             modifier = Modifier.padding(16.dp),
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.titleMedium
@@ -398,16 +438,46 @@ fun DirectionsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocationPickerSheet(
-    locations: List<Location>,
+    searchEngine: com.example.unifind.search.SearchEngine,
+    routePlanner: com.example.unifind.routing.RoutePlanner,
     myLocation: MyLocation?,
-    onLocationSelected: (Location?) -> Unit,
+    onLocationSelected: (Location, com.example.unifind.model.Room?) -> Unit,
     onNearestGateSelected: () -> Unit,
     onMyLocationSelected: () -> Unit,
+    onSetOnMapSelected: () -> Unit,
     onDismissRequest: () -> Unit,
     showMyLocation: Boolean
 ) {
     var query by remember { mutableStateOf("") }
-    val filtered = locations.filter { it.name.contains(query, ignoreCase = true) }
+    var selectedCategory by remember { mutableStateOf("All") }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val results = if (query.isBlank()) {
+        when (selectedCategory) {
+            "Gates" -> searchEngine.filterByType(com.example.unifind.search.LocationType.GATE)
+            "Facilities" -> searchEngine.filterByType(com.example.unifind.search.LocationType.FACILITY)
+            "Buildings" -> searchEngine.filterByType(com.example.unifind.search.LocationType.BUILDING)
+            "Rooms" -> searchEngine.filterByType(com.example.unifind.search.LocationType.ROOM)
+            else -> searchEngine.getAllGrouped().values.flatten()
+        }
+    } else {
+        val searchResults = searchEngine.search(query)
+        when (selectedCategory) {
+            "Gates" -> searchResults.filter { it.location is Gate && it.room == null }
+            "Facilities" -> searchResults.filter { it.location is Facility && it.room == null }
+            "Buildings" -> searchResults.filter { it.location is Building && it.room == null }
+            "Rooms" -> searchResults.filter { it.room != null }
+            else -> searchResults
+        }
+    }
+
+    val rankedResults = com.example.unifind.routing.DestinationRanker().rankSearchResults(
+        results = results,
+        getDistanceMeters = { loc ->
+            if (myLocation != null) routePlanner.fromPoint(myLocation.mapX, myLocation.mapY, loc.id)?.distanceMeters else null
+        },
+        query = query
+    )
 
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -415,25 +485,51 @@ fun LocationPickerSheet(
                 value = query,
                 onValueChange = { query = it },
                 label = { Text("Search location") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() })
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                listOf("All", "Gates", "Facilities", "Buildings", "Rooms").forEach { category ->
+                    FilterChip(
+                        selected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                        label = { Text(category) }
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             LazyColumn {
                 if (showMyLocation && query.isEmpty()) {
                     item {
                         Column {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onMyLocationSelected() }
-                                    .padding(vertical = 12.dp)
-                            ) {
-                                Column {
-                                    Text("My location", color = MaterialTheme.colorScheme.primary)
-                                    if (myLocation != null) {
-                                        Text(myLocation.label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                                    } else {
-                                        Text("Not set", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), style = MaterialTheme.typography.bodySmall)
+                            if (myLocation != null) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onMyLocationSelected() }
+                                        .padding(vertical = 12.dp)
+                                ) {
+                                    Column {
+                                        val labelText = if (myLocation.label.isNotBlank()) "My location - near ${myLocation.label}" else "My location"
+                                        Text(labelText, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                                    }
+                                }
+                            } else {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { onSetOnMapSelected() }
+                                        .padding(vertical = 12.dp)
+                                ) {
+                                    Column {
+                                        Text("Set on map", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                                        Text("Tap where you are on the map", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
                             }
@@ -442,21 +538,63 @@ fun LocationPickerSheet(
                                     .fillMaxWidth()
                                     .clickable { onNearestGateSelected() }
                                     .padding(vertical = 12.dp)
-                            ) {
+                                ) {
                                 Text("Nearest gate (auto)", color = MaterialTheme.colorScheme.primary)
                             }
                             HorizontalDivider()
                         }
                     }
                 }
-                items(filtered) { loc ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onLocationSelected(loc) }
-                            .padding(vertical = 12.dp)
-                    ) {
-                        Text(loc.name)
+
+                if (rankedResults.isEmpty() && query.isNotBlank()) {
+                    item {
+                        Text(
+                            text = "No place or room matches '$query'",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(vertical = 16.dp)
+                        )
+                    }
+                } else {
+                    items(rankedResults) { item ->
+                        val res = item.result
+                        val loc = res.location
+                        val room = res.room
+                        val dist = item.distanceMeters
+                        val isUnderConstruction = loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION
+
+                        val headline = if (room != null) {
+                            "${room.name} - ${loc.name}, ${res.floorLabel}"
+                        } else {
+                            loc.name
+                        }
+
+                        val distanceText = if (isUnderConstruction) {
+                            "Coming soon"
+                        } else if (dist != null) {
+                            "about ${RouteSummaryFormatter.formatDistance(dist)} m"
+                        } else {
+                            ""
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onLocationSelected(loc, room) }
+                                .padding(vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(headline)
+                                if (distanceText.isNotBlank()) {
+                                    Text(
+                                        distanceText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isUnderConstruction) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

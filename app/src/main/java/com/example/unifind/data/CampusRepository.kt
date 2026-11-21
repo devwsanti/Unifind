@@ -17,16 +17,19 @@ import com.example.unifind.model.Room
 import kotlinx.serialization.json.Json
 
 /**
- * OOP Concept: Repository Pattern / Singleton
+ * OOP Concept: Repository Pattern / Singleton / Dependency Injection
  * Encapsulates the logic for loading and mapping data from JSON.
  */
-class CampusRepository(private val context: Context) {
+class CampusRepository(private val jsonSupplier: () -> String) {
+
+    constructor(context: Context) : this({
+        context.assets.open("campus.json").bufferedReader().use { it.readText() }
+    })
 
     private val json = Json { ignoreUnknownKeys = true }
 
     private val campusData: CampusDto by lazy {
-        val jsonString = context.assets.open("campus.json").bufferedReader().use { it.readText() }
-        json.decodeFromString<CampusDto>(jsonString)
+        json.decodeFromString<CampusDto>(jsonSupplier())
     }
 
     private val locationsList: List<Location> by lazy {
@@ -45,6 +48,20 @@ class CampusRepository(private val context: Context) {
     fun getFacilities(): List<Facility> = locationsList.filterIsInstance<Facility>()
 
     fun getColleges(): List<String> = campusData.colleges
+
+    fun getBuildingsForCollege(collegeName: String): List<Building> {
+        val norm = collegeName.replace(Regex("[ .-]"), "").lowercase()
+        return getBuildings().filter { b ->
+            val bCollegeNorm = b.college.replace(Regex("[ .-]"), "").lowercase()
+            if (bCollegeNorm == norm) return@filter true
+            b.floors.any { f ->
+                f.rooms.any { r ->
+                    r.ownerCollege?.replace(Regex("[ .-]"), "")?.lowercase() == norm ||
+                    r.sharedWith.any { it.replace(Regex("[ .-]"), "").lowercase() == norm }
+                }
+            }
+        }
+    }
 
     fun findById(id: String): Location? = locationsList.find { it.id == id }
 

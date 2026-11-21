@@ -17,11 +17,23 @@ class Building(
 ) : Location(id, name, mapX, mapY, latitude, longitude) {
 
     override fun describe(): String {
-        return if (status == BuildingStatus.UNDER_CONSTRUCTION) {
-            "$name: Coming soon"
-        } else {
-            "Building: $name, College: $college"
+        if (status == BuildingStatus.UNDER_CONSTRUCTION) {
+            return "Coming soon"
         }
+        val collegeLabel = if (college.isBlank() ||
+            college.equals("Shared", ignoreCase = true) ||
+            college.equals("Unassigned", ignoreCase = true) ||
+            college.equals("None", ignoreCase = true)
+        ) {
+            "Shared building"
+        } else {
+            college
+        }
+        val floorCount = floors.size
+        val roomCount = floors.sumOf { it.rooms.size }
+        val floorStr = "$floorCount floor${if (floorCount == 1) "" else "s"}"
+        val roomStr = "$roomCount room${if (roomCount == 1) "" else "s"}"
+        return "$collegeLabel - $floorStr - $roomStr"
     }
 
     override fun matches(query: String): Boolean {

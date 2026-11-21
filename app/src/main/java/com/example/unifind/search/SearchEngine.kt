@@ -1,7 +1,6 @@
 package com.example.unifind.search
 
 import com.example.unifind.model.Building
-import com.example.unifind.model.BuildingStatus
 import com.example.unifind.model.Facility
 import com.example.unifind.model.Gate
 import com.example.unifind.model.Location
@@ -18,11 +17,7 @@ class SearchEngine(private val locations: List<Location>) {
 
     init {
         locations.forEach { loc ->
-            val locSubtitle = if (loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION) {
-                "Coming soon"
-            } else {
-                loc.describe()
-            }
+            val locSubtitle = loc.describe()
 
             searchables.add(loc to SearchResult(
                 location = loc,
@@ -97,6 +92,15 @@ class SearchEngine(private val locations: List<Location>) {
                 LocationType.BUILDING -> result.location is Building && result.room == null
                 LocationType.ROOM -> result.room != null
             }
+        }
+    }
+
+    fun getAllGrouped(): Map<LocationType, List<SearchResult>> {
+        return LinkedHashMap<LocationType, List<SearchResult>>().apply {
+            put(LocationType.GATE, filterByType(LocationType.GATE))
+            put(LocationType.FACILITY, filterByType(LocationType.FACILITY))
+            put(LocationType.BUILDING, filterByType(LocationType.BUILDING))
+            put(LocationType.ROOM, filterByType(LocationType.ROOM))
         }
     }
 }

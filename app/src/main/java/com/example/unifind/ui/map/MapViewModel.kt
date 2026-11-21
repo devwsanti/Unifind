@@ -3,7 +3,10 @@ package com.example.unifind.ui.map
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.unifind.UniFindApplication
+import com.example.unifind.data.GraphRepository
 import com.example.unifind.model.Location
+import com.example.unifind.routing.DijkstraRouteFinder
+import com.example.unifind.routing.RoutePlanner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +18,11 @@ import kotlinx.coroutines.flow.update
  */
 class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = (application as UniFindApplication).repository
+    private val graphRepo = GraphRepository(application)
+    private val routeFinder = DijkstraRouteFinder(graphRepo.graph)
+
+    val routePlanner = RoutePlanner(graphRepo.graph, routeFinder)
+    val graphNodes = graphRepo.graph.nodes
 
     private val _selectedLocation = MutableStateFlow<Location?>(null)
     val selectedLocation: StateFlow<Location?> = _selectedLocation.asStateFlow()

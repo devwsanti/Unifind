@@ -35,6 +35,9 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
     }
     private val nearestNodeFinder = NearestNodeFinder(graphRepo.graph.imageWidth, graphRepo.graph.imageHeight)
 
+    val searchEngine = app.searchEngine
+    val routePlannerInstance = routePlanner
+
     val allLocations = repository.getAllLocations().filter { it.mapX != 0f || it.mapY != 0f }
     val gates: List<Gate> = repository.getGates()
 
@@ -43,6 +46,9 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _toLocation = MutableStateFlow<Location?>(null)
     val toLocation: StateFlow<Location?> = _toLocation.asStateFlow()
+
+    private val _targetRoom = MutableStateFlow<com.example.unifind.model.Room?>(null)
+    val targetRoom: StateFlow<com.example.unifind.model.Room?> = _targetRoom.asStateFlow()
 
     private val _isNearestGateAuto = MutableStateFlow(false)
     val isNearestGateAuto: StateFlow<Boolean> = _isNearestGateAuto.asStateFlow()
@@ -94,14 +100,19 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun setToLocation(location: Location?) {
+    fun setToLocation(location: Location?, room: com.example.unifind.model.Room? = null) {
         _toLocation.update { location }
+        _targetRoom.update { room }
         calculateRoute()
     }
 
-    fun setToLocationById(id: String?) {
+    fun setToLocationById(id: String?, roomId: String? = null) {
         if (id != null) {
-            setToLocation(repository.findById(id))
+            val loc = repository.findById(id)
+            val room = if (roomId != null && loc is com.example.unifind.model.Building) {
+                loc.floors.flatMap { it.rooms }.find { it.id == roomId }
+            } else null
+            setToLocation(loc, room)
         }
     }
 
@@ -114,6 +125,7 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun swapLocations() {
+        _targetRoom.update { null }
         if (_isNearestGateAuto.value || _isFromMyLocation.value) {
             _isNearestGateAuto.update { false }
             _isFromMyLocation.update { false }

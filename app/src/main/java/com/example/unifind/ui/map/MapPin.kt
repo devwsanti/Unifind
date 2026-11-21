@@ -8,17 +8,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.unifind.model.Building
@@ -38,37 +41,40 @@ fun MapPin(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isEditorMode: Boolean = false
+    isEditorMode: Boolean = false,
+    rotation: Float = 0f
 ) {
+    val buildingColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
     val color = when (location) {
         is Gate -> Color.Red
         is Facility -> Color.Green
         is Building -> {
-            if (location.status == BuildingStatus.UNDER_CONSTRUCTION) Color.Gray else Color.Blue
+            if (location.status == BuildingStatus.UNDER_CONSTRUCTION) Color.Gray else buildingColor
         }
         else -> Color.Black
     }
 
     MapPinBase(
         color = color,
-        label = location.name,
         scale = scale,
         isSelected = isSelected,
         onClick = onClick,
         modifier = modifier,
-        isEditorMode = isEditorMode
+        isEditorMode = isEditorMode,
+        rotation = rotation
     )
 }
 
 @Composable
 fun MapPinBase(
     color: Color,
-    label: String,
     scale: Float,
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isEditorMode: Boolean = false
+    isEditorMode: Boolean = false,
+    label: String? = null,
+    rotation: Float = 0f
 ) {
     val heightDp = if (isSelected) 31.dp else 24.dp
     val widthDp = heightDp * 0.7f
@@ -81,6 +87,10 @@ fun MapPinBase(
             modifier = Modifier
                 .offset(x = -widthDp / 2, y = -heightDp)
                 .size(widthDp, heightDp)
+                .graphicsLayer(
+                    rotationZ = -rotation,
+                    transformOrigin = TransformOrigin(0.5f, 1.0f)
+                )
                 .let { if (!isEditorMode) it.clickable { onClick() } else it }
         ) {
             Canvas(modifier = Modifier.fillMaxSize().graphicsLayer(alpha = alpha)) {
@@ -114,17 +124,37 @@ fun MapPinBase(
                 }
             }
         }
-
-        if (scale >= 2.5f || isSelected) {
-            Text(
-                text = label,
-                color = Color.Black,
-                fontSize = 10.sp,
-                modifier = Modifier
-                    .offset(x = widthDp / 2 + 4.dp, y = -heightDp * 0.75f)
-                    .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            )
-        }
     }
+}
+
+@Composable
+fun MapPinLabel(
+    label: String,
+    scale: Float,
+    modifier: Modifier = Modifier,
+    rotation: Float = 0f
+) {
+    val fontScale = LocalDensity.current.fontScale
+    val fontSizeSp = (11f / (fontScale * scale)).sp
+    val maxWidthDp = (120f / scale).dp
+    val cornerRadiusDp = (4f / scale).dp
+    val paddingHorizDp = (4f / scale).dp
+    val paddingVertDp = (2f / scale).dp
+
+    Text(
+        text = label,
+        color = Color.Black,
+        fontSize = fontSizeSp,
+        maxLines = 1,
+        softWrap = false,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+            .graphicsLayer(
+                rotationZ = -rotation,
+                transformOrigin = TransformOrigin(0.5f, 0.5f)
+            )
+            .widthIn(max = maxWidthDp)
+            .background(Color.White.copy(alpha = 0.8f), RoundedCornerShape(cornerRadiusDp))
+            .padding(horizontal = paddingHorizDp, vertical = paddingVertDp)
+    )
 }

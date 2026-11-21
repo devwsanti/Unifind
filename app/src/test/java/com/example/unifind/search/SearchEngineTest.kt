@@ -62,6 +62,15 @@ class SearchEngineTest {
     }
 
     @Test
+    fun testRoomQueryReturnsRoom() {
+        val results = searchEngine.search("HEB101")
+        val roomResult = results.find { it.room != null }
+        assertTrue(roomResult != null)
+        assertEquals("HEB101", roomResult?.room?.name)
+        assertEquals("heb", roomResult?.location?.id)
+    }
+
+    @Test
     fun testSearchCashier() {
         val results = searchEngine.search("cashier")
         assertTrue(results.isNotEmpty())
@@ -96,5 +105,52 @@ class SearchEngineTest {
         assertEquals(2, results.size)
         assertEquals("HEB101", results[0].title) // Exact match first
         assertEquals("Higher Education Building", results[1].title) // Contains/building match next
+    }
+
+    @Test
+    fun testEmptyQueryAllGrouping() {
+        val grouped = searchEngine.getAllGrouped()
+        assertEquals(4, grouped.size)
+        assertTrue(grouped.containsKey(LocationType.GATE))
+        assertTrue(grouped.containsKey(LocationType.FACILITY))
+        assertTrue(grouped.containsKey(LocationType.BUILDING))
+        assertTrue(grouped.containsKey(LocationType.ROOM))
+
+        val gates = grouped[LocationType.GATE] ?: emptyList()
+        assertEquals(1, gates.size)
+        assertEquals("g1", gates.first().location.id)
+
+        val facilities = grouped[LocationType.FACILITY] ?: emptyList()
+        assertEquals(1, facilities.size)
+        assertEquals("library", facilities.first().location.id)
+
+        val buildings = grouped[LocationType.BUILDING] ?: emptyList()
+        assertEquals(4, buildings.size)
+
+        val rooms = grouped[LocationType.ROOM] ?: emptyList()
+        assertEquals(4, rooms.size)
+    }
+
+    @Test
+    fun testBuildingDescribe() {
+        val room1 = Room("r1", "Room 1", "1st Floor", null, emptyList())
+        val room2 = Room("r2", "Room 2", "2nd Floor", null, emptyList())
+        val buildingWithCollege = Building(
+            "b1", "Building 1", 0f, 0f, "College of Teacher Education", BuildingStatus.ACTIVE,
+            listOf(Floor("1st Floor", listOf(room1)), Floor("2nd Floor", listOf(room2)))
+        )
+        assertEquals("College of Teacher Education - 2 floors - 2 rooms", buildingWithCollege.describe())
+
+        val sharedBuilding = Building(
+            "b2", "Building 2", 0f, 0f, "Shared", BuildingStatus.ACTIVE,
+            listOf(Floor("1st Floor", listOf(room1, room2)))
+        )
+        assertEquals("Shared building - 1 floor - 2 rooms", sharedBuilding.describe())
+
+        val underConstBuilding = Building(
+            "b3", "Building 3", 0f, 0f, "CAS", BuildingStatus.UNDER_CONSTRUCTION,
+            emptyList()
+        )
+        assertEquals("Coming soon", underConstBuilding.describe())
     }
 }

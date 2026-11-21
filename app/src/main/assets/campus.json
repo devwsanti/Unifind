@@ -20,16 +20,16 @@
     {
       "id": "gate_2",
       "name": "Gate 2",
-      "mapX": 0.4494,
-      "mapY": 0.54,
+      "mapX": 0.5647,
+      "mapY": 0.8497,
       "latitude": null,
       "longitude": null
     },
     {
       "id": "gate_3",
       "name": "Gate 3",
-      "mapX": 0.5647,
-      "mapY": 0.8497,
+      "mapX": 0.4494,
+      "mapY": 0.54,
       "latitude": null,
       "longitude": null
     },
@@ -287,8 +287,15 @@
               "sharedWith": []
             },
             {
-              "id": "heb_cr_3f",
-              "name": "Male & Female CR",
+              "id": "heb_male_cr_3f",
+              "name": "Male CR",
+              "floorLabel": "3rd Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "heb_female_cr_3f",
+              "name": "Female CR",
               "floorLabel": "3rd Floor",
               "ownerCollege": null,
               "sharedWith": []
@@ -748,8 +755,15 @@
               "sharedWith": []
             },
             {
-              "id": "lemery_cr",
-              "name": "Male and Female CR",
+              "id": "lemery_male_cr_1f",
+              "name": "Male CR",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
+              "id": "lemery_female_cr_1f",
+              "name": "Female CR",
               "floorLabel": "1st Floor",
               "ownerCollege": null,
               "sharedWith": []
