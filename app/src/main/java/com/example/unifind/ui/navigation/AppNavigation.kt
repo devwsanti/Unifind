@@ -34,6 +34,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.unifind.UniFindApplication
+import com.example.unifind.config.AppConfig
 import com.example.unifind.ui.colleges.CollegeBuildingsScreen
 import com.example.unifind.ui.colleges.CollegesScreen
 import com.example.unifind.ui.detail.BuildingDetailScreen
@@ -194,8 +195,12 @@ fun AppNavigation() {
                     locationId = locationId,
                     openImHere = openImHere,
                     startPlacing = startPlacing,
-                    isEditMode = isEditMode,
-                    onEditModeChange = { isEditMode = it },
+                    isEditMode = if (AppConfig.DEVELOPER_MODE) isEditMode else false,
+                    onEditModeChange = { newMode ->
+                        if (AppConfig.DEVELOPER_MODE) {
+                            isEditMode = newMode
+                        }
+                    },
                     navController = navController,
                     currentLocationHolder = currentLocationHolder
                 )

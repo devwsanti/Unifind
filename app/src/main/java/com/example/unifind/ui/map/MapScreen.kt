@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -43,6 +44,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.example.unifind.BuildConfig
 import com.example.unifind.UniFindApplication
+import com.example.unifind.config.AppConfig
 import com.example.unifind.model.Building
 import com.example.unifind.model.BuildingStatus
 import com.example.unifind.model.Facility
@@ -59,6 +61,7 @@ import com.example.unifind.ui.map.editor.GraphEditorViewModel
 import com.example.unifind.ui.navigation.Screen
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +78,8 @@ fun MapScreen(
 ) {
     val selectedLocation by viewModel.selectedLocation.collectAsState()
     val isCalibrationMode by viewModel.isCalibrationMode.collectAsState()
-    val placedLocations = viewModel.placedLocations
+    val locationsVersion by viewModel.locationsVersion.collectAsState()
+    val placedLocations = remember(locationsVersion) { viewModel.placedLocations }
     val allLocationsCount = viewModel.allLocations.size
 
     val myLocation by currentLocationHolder.myLocation.collectAsState()
@@ -83,6 +87,7 @@ fun MapScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val graphRepo = remember(context) { com.example.unifind.data.GraphRepository(context) }
 
     var calibrationTap by remember { mutableStateOf<Pair<Float, Float>?>(null) }
     var legendExpanded by remember { mutableStateOf(false) }
@@ -97,6 +102,7 @@ fun MapScreen(
     val editorUpdateTrigger by editorViewModel.updateTrigger.collectAsState()
     var showValidate by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
+    var showResetAllConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(openImHere) {
         if (openImHere) {
@@ -122,11 +128,22 @@ fun MapScreen(
         }
     }
 
+    LaunchedEffect(AppConfig.DEVELOPER_MODE, isEditMode, isCalibrationMode) {
+        if (!AppConfig.DEVELOPER_MODE) {
+            if (isEditMode) {
+                onEditModeChange(false)
+            }
+            if (isCalibrationMode) {
+                viewModel.setMapMode(MapMode.View)
+            }
+        }
+    }
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            if (isEditMode) {
+            if (AppConfig.DEVELOPER_MODE && isEditMode) {
                 val trigger = editorUpdateTrigger
                 var editorMenuExpanded by remember { mutableStateOf(false) }
                 TopAppBar(
@@ -199,53 +216,59 @@ fun MapScreen(
             } else {
                 TopAppBar(
                     title = {
-                        Column {
+                        if (AppConfig.DEVELOPER_MODE) {
+                            Column {
+                                Text("Campus Map", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    text = "${placedLocations.size} of $allLocationsCount locations placed",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        } else {
                             Text("Campus Map", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            Text(
-                                text = "${placedLocations.size} of $allLocationsCount locations placed",
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
                     },
                     actions = {
-                        Box {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "Mode Selector")
-                            }
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = if (isCalibrationMode) "View mode" else "Calibrate mode",
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    },
-                                    onClick = {
-                                        viewModel.toggleCalibrationMode()
-                                        menuExpanded = false
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Edit paths", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                    onClick = {
-                                        if (isCalibrationMode) viewModel.toggleCalibrationMode()
-                                        onEditModeChange(true)
-                                        menuExpanded = false
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Validate graph", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                    onClick = {
-                                        showValidate = true
-                                        menuExpanded = false
-                                    }
-                                )
+                        if (AppConfig.DEVELOPER_MODE) {
+                            Box {
+                                IconButton(onClick = { menuExpanded = true }) {
+                                    Icon(Icons.Default.MoreVert, contentDescription = "Mode Selector")
+                                }
+                                DropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = if (isCalibrationMode) "View mode" else "Calibrate mode",
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        },
+                                        onClick = {
+                                            viewModel.toggleCalibrationMode()
+                                            menuExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Edit paths", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                        onClick = {
+                                            if (isCalibrationMode) viewModel.toggleCalibrationMode()
+                                            onEditModeChange(true)
+                                            menuExpanded = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("Validate graph", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                        onClick = {
+                                            showValidate = true
+                                            menuExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -278,7 +301,7 @@ fun MapScreen(
                     focusTarget = customFocusTarget ?: (if (selectedLocation != null && selectedLocation!!.mapX > 0f)
                         Pair(selectedLocation!!.mapX, selectedLocation!!.mapY)
                     else null),
-                    hasSheet = (selectedLocation != null)
+                    hasSheet = (selectedLocation != null && !isCalibrationMode)
                 ) { scale, offset, rotation ->
                     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                         val w = maxWidth.value
@@ -292,10 +315,20 @@ fun MapScreen(
                                 scale = scale,
                                 isSelected = loc.id == selectedLocation?.id,
                                 onClick = {
-                                    if (!isCalibrationMode && !isEditMode && !isPlacingLocationOnMap) {
+                                    if (!isEditMode && !isPlacingLocationOnMap) {
                                         viewModel.selectLocation(loc)
                                     }
                                 },
+                                onDrag = if (isCalibrationMode) { dragAmount ->
+                                    val dxDp = dragAmount.x / (density * scale)
+                                    val dyDp = dragAmount.y / (density * scale)
+                                    val newAbsX = absX + dxDp
+                                    val newAbsY = absY + dyDp
+                                    val (newMapX, newMapY) = MapCoordinates.fromAbsolute(newAbsX, newAbsY, w, h)
+                                    viewModel.moveLocation(loc.id, newMapX, newMapY)
+                                    viewModel.selectLocation(loc)
+                                } else null,
+                                isCalibrationMode = isCalibrationMode,
                                 modifier = Modifier.offset(
                                     x = absX.dp,
                                     y = absY.dp
@@ -321,7 +354,6 @@ fun MapScreen(
                                 if (scale >= 2.5f || isSel) {
                                     val (absX, absY) = MapCoordinates.toAbsolute(loc.mapX, loc.mapY, w, h)
                                     val pinHeightDp = if (isSel) 31f else 24f
-                                    val pinWidthDp = pinHeightDp * 0.7f
 
                                     val isVisibleOnScreen = absX >= visibleMinX && absX <= visibleMaxX && absY >= visibleMinY && absY <= visibleMaxY
 
@@ -377,6 +409,33 @@ fun MapScreen(
                             }
                         }
 
+                        if (isPlacingLocationOnMap && placedDotPos != null) {
+                            val (px, py) = placedDotPos!!
+                            val edgeResult = remember(px, py) {
+                                com.example.unifind.routing.NearestEdgePointFinder(graphRepo.graph).findNearestEdgePoint(px, py)
+                            }
+                            if (edgeResult != null) {
+                                val (absPx, absPy) = MapCoordinates.toAbsolute(px, py, w, h)
+                                val (absSx, absSy) = MapCoordinates.toAbsolute(edgeResult.snappedX, edgeResult.snappedY, w, h)
+
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    val start = Offset(absPx.dp.toPx(), absPy.dp.toPx())
+                                    val end = Offset(absSx.dp.toPx(), absSy.dp.toPx())
+                                    drawLine(
+                                        color = Color(0xFF4CAF50),
+                                        start = start,
+                                        end = end,
+                                        strokeWidth = 2.dp.toPx()
+                                    )
+                                    drawCircle(
+                                        color = Color(0xFF4CAF50),
+                                        radius = 5.dp.toPx(),
+                                        center = end
+                                    )
+                                }
+                            }
+                        }
+
                         if (placedDotPos != null) {
                             val (px, py) = placedDotPos!!
                             val (absX, absY) = MapCoordinates.toAbsolute(px, py, w, h)
@@ -403,21 +462,33 @@ fun MapScreen(
                                 viewModel = editorViewModel
                             )
                         }
+                    }
+                }
 
-                        if (isCalibrationMode && calibrationTap != null) {
-                            val (x, y) = calibrationTap!!
-                            val (absX, absY) = MapCoordinates.toAbsolute(x, y, w, h)
-                            MapPinBase(
-                                color = Color.Black,
-                                scale = scale,
-                                isSelected = true,
-                                onClick = {},
-                                modifier = Modifier.offset(
-                                    x = absX.dp,
-                                    y = absY.dp
-                                ),
-                                isEditorMode = false,
-                                rotation = rotation
+                if (isCalibrationMode) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 12.dp),
+                        shadowElevation = 4.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Calibrate mode",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }
@@ -445,62 +516,96 @@ fun MapScreen(
                     }
 
                     if (placedDotPos != null) {
+                        val (px, py) = placedDotPos!!
+                        val edgeResult = remember(px, py) {
+                            com.example.unifind.routing.NearestEdgePointFinder(graphRepo.graph).findNearestEdgePoint(px, py)
+                        }
+                        val snapDistMeters = edgeResult?.distanceToEdgeMeters ?: Double.MAX_VALUE
+                        val isTooFar = snapDistMeters > com.example.unifind.routing.NearestEdgePointFinder.MAX_SNAP_DISTANCE_M
+
                         Card(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(bottom = 24.dp, start = 16.dp, end = 16.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Button(
-                                    onClick = {
-                                        val (px, py) = placedDotPos!!
-                                        val nearestLoc = NearestLocationFinder().findNearestLocation(viewModel.allLocations, px, py)
-                                        currentLocationHolder.setLocation(px, py, nearestLoc?.name ?: "")
-                                        isPlacingLocationOnMap = false
-                                        placedDotPos = null
-                                        showWhereToGoSheet = true
-                                    },
-                                    modifier = Modifier.semantics { contentDescription = "Set here" }
-                                ) {
-                                    Text("Set here")
+                                val distText = if (isTooFar) {
+                                    "Too far from a walkway. Move closer to a path."
+                                } else {
+                                    "~${snapDistMeters.roundToInt()} m to the nearest path"
                                 }
-                                TextButton(
-                                    onClick = {
-                                        isPlacingLocationOnMap = false
-                                        placedDotPos = null
-                                    }
+
+                                Text(
+                                    text = distText,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = if (isTooFar) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text("Cancel")
+                                    Button(
+                                        onClick = {
+                                            val nearestLoc = NearestLocationFinder().findNearestLocation(viewModel.allLocations, px, py)
+                                            currentLocationHolder.setLocation(px, py, nearestLoc?.name ?: "")
+                                            isPlacingLocationOnMap = false
+                                            placedDotPos = null
+                                            showWhereToGoSheet = true
+                                        },
+                                        enabled = !isTooFar,
+                                        modifier = Modifier.semantics { contentDescription = "Set here" }
+                                    ) {
+                                        Text("Set here")
+                                    }
+                                    TextButton(
+                                        onClick = {
+                                            isPlacingLocationOnMap = false
+                                            placedDotPos = null
+                                        }
+                                    ) {
+                                        Text("Cancel")
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                if (!isEditMode) {
+                if (!isEditMode && !isCalibrationMode) {
+                    // Consistent Legend UI with RoundedCornerShape(16.dp), 40.dp height, labelLarge font
                     Box(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                        Card {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 3.dp,
+                            shadowElevation = 2.dp
+                        ) {
                             Column {
                                 Row(
                                     modifier = Modifier
                                         .clickable { legendExpanded = !legendExpanded }
-                                        .padding(8.dp),
+                                        .height(40.dp)
+                                        .padding(horizontal = 12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text("Legend", style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Spacer(modifier = Modifier.width(4.dp))
                                     Icon(
                                         if (legendExpanded) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp,
                                         contentDescription = null
                                     )
                                 }
                                 if (legendExpanded) {
-                                    Column(modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)) {
+                                    Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 8.dp)) {
                                         LegendItem("Gate", Color.Red)
-                                        LegendItem("Building", MaterialTheme.colorScheme.primary)
+                                        LegendItem("Building", Color(0xFF1F2FBF))
                                         LegendItem("Facility", Color.Green)
                                         LegendItem("Under construction", Color.Gray)
                                     }
@@ -511,6 +616,7 @@ fun MapScreen(
 
                     val isSheetOrPlacingOpen = showImHereSheet || isPlacingLocationOnMap || showWhereToGoSheet
 
+                    // Consistent FAB controls with RoundedCornerShape(16.dp), 40.dp height, labelLarge font and 16.dp bottom margin
                     Column(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -527,7 +633,10 @@ fun MapScreen(
                                             customFocusTarget = Pair(loc.mapX, loc.mapY)
                                         }
                                     },
-                                    modifier = Modifier.semantics { contentDescription = "Center on me" }
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .semantics { contentDescription = "Center on me" }
                                 ) {
                                     Icon(Icons.Default.LocationOn, contentDescription = "Center on me")
                                 }
@@ -539,9 +648,12 @@ fun MapScreen(
                                             customFocusTarget = Pair(loc.mapX, loc.mapY)
                                         }
                                     },
+                                    shape = RoundedCornerShape(16.dp),
+                                    modifier = Modifier
+                                        .height(40.dp)
+                                        .semantics { contentDescription = "Center on me" },
                                     icon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
-                                    text = { Text("Center on me") },
-                                    modifier = Modifier.semantics { contentDescription = "Center on me" }
+                                    text = { Text("Center on me", style = MaterialTheme.typography.labelLarge) }
                                 )
                             }
                         }
@@ -549,44 +661,126 @@ fun MapScreen(
                         if (isSheetOrPlacingOpen) {
                             SmallFloatingActionButton(
                                 onClick = { showImHereSheet = true },
-                                modifier = Modifier.semantics { contentDescription = "I'm here" }
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .semantics { contentDescription = "I'm here" }
                             ) {
                                 Icon(Icons.Default.LocationOn, contentDescription = "I'm here")
                             }
                         } else {
                             ExtendedFloatingActionButton(
                                 onClick = { showImHereSheet = true },
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .height(40.dp)
+                                    .semantics { contentDescription = "I'm here" },
                                 icon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
-                                text = { Text("I'm here") },
-                                modifier = Modifier.semantics { contentDescription = "I'm here" }
+                                text = { Text("I'm here", style = MaterialTheme.typography.labelLarge) }
                             )
                         }
                     }
                 }
 
                 if (isCalibrationMode) {
-                    calibrationTap?.let { (x, y) ->
-                        Card(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(16.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                val strX = String.format(Locale.US, "%.4f", x)
-                                val strY = String.format(Locale.US, "%.4f", y)
-                                val textToCopy = "\"mapX\": $strX, \"mapY\": $strY"
-                                Text("Tapped Position:", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(textToCopy, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Card(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            if (selectedLocation != null) {
+                                val loc = selectedLocation!!
+                                Text(
+                                    text = loc.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                val strX = String.format(Locale.US, "%.4f", loc.mapX)
+                                val strY = String.format(Locale.US, "%.4f", loc.mapY)
+                                Text(
+                                    text = "mapX: $strX, mapY: $strY",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Button(onClick = {
-                                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    val clip = ClipData.newPlainText("Campus Map Coordinate", textToCopy)
-                                    clipboard.setPrimaryClip(clip)
-                                }) {
-                                    Text("Copy", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Button(
+                                        onClick = { viewModel.resetLocation(loc.id) },
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Reset this pin", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    OutlinedButton(
+                                        onClick = { viewModel.undo() },
+                                        enabled = viewModel.canUndo(),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Undo", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    text = "Tap or drag a pin to calibrate",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    OutlinedButton(
+                                        onClick = { viewModel.undo() },
+                                        enabled = viewModel.canUndo(),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text("Undo", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Button(
+                                    onClick = {
+                                        val json = viewModel.getCalibratedJson()
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        clipboard.setPrimaryClip(ClipData.newPlainText("Campus Locations JSON", json))
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("Copied JSON to clipboard")
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Copy JSON", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+
+                                OutlinedButton(
+                                    onClick = { showResetAllConfirm = true },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Reset all", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Changes last until the app closes. Paste the copied JSON into campus.json to keep them.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -634,6 +828,30 @@ fun MapScreen(
                 },
                 dismissButton = {
                     TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                }
+            )
+        }
+
+        if (showResetAllConfirm) {
+            AlertDialog(
+                onDismissRequest = { showResetAllConfirm = false },
+                title = { Text("Reset all pins?") },
+                text = { Text("This will reset all pin positions back to their original values in campus.json.") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.resetAllLocations()
+                            showResetAllConfirm = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Reset all")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetAllConfirm = false }) {
+                        Text("Cancel")
+                    }
                 }
             )
         }
@@ -833,113 +1051,115 @@ fun MapScreen(
             }
         }
 
-        selectedLocation?.let { loc ->
-            val isUnderConstruction = loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION
-            val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-            ModalBottomSheet(
-                onDismissRequest = { viewModel.selectLocation(null) },
-                modifier = Modifier.heightIn(max = screenHeight * 0.35f)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .fillMaxWidth()
+        if (!isCalibrationMode) {
+            selectedLocation?.let { loc ->
+                val isUnderConstruction = loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION
+                val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+                ModalBottomSheet(
+                    onDismissRequest = { viewModel.selectLocation(null) },
+                    modifier = Modifier.heightIn(max = screenHeight * 0.35f)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth()
                     ) {
-                        Text(
-                            text = loc.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-
-                        val typeLabel = when {
-                            isUnderConstruction -> "Under Construction"
-                            loc is Building -> "Building"
-                            loc is Gate -> "Gate"
-                            loc is Facility -> "Facility"
-                            else -> "Location"
-                        }
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text(typeLabel, style = MaterialTheme.typography.labelSmall) }
-                        )
-                    }
-
-                    if (loc is Building) {
-                        if (loc.college.isNotBlank()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Text(
-                                text = loc.college,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = loc.name,
+                                style = MaterialTheme.typography.titleLarge,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+
+                            val typeLabel = when {
+                                isUnderConstruction -> "Under Construction"
+                                loc is Building -> "Building"
+                                loc is Gate -> "Gate"
+                                loc is Facility -> "Facility"
+                                else -> "Location"
+                            }
+                            SuggestionChip(
+                                onClick = {},
+                                label = { Text(typeLabel, style = MaterialTheme.typography.labelSmall) }
                             )
                         }
 
-                        val floorCount = loc.floors.size
-                        val roomCount = loc.floors.sumOf { it.rooms.size }
-                        Text(
-                            text = "$floorCount floors - $roomCount rooms",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
                         if (loc is Building) {
+                            if (loc.college.isNotBlank()) {
+                                Text(
+                                    text = loc.college,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            val floorCount = loc.floors.size
+                            val roomCount = loc.floors.sumOf { it.rooms.size }
+                            Text(
+                                text = "$floorCount floors - $roomCount rooms",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (loc is Building) {
+                                Button(
+                                    onClick = {
+                                        navController.navigate("building/${loc.id}")
+                                        viewModel.selectLocation(null)
+                                    },
+                                    enabled = !isUnderConstruction,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(if (isUnderConstruction) "Coming soon" else "View details", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                            }
                             Button(
                                 onClick = {
-                                    navController.navigate("building/${loc.id}")
+                                    navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id)) {
+                                        popUpTo(navController.graph.findStartDestination().id)
+                                        launchSingleTop = true
+                                    }
                                     viewModel.selectLocation(null)
                                 },
                                 enabled = !isUnderConstruction,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text(if (isUnderConstruction) "Coming soon" else "View details", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text(if (isUnderConstruction) "Coming soon" else "Directions", maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
-                        Button(
-                            onClick = {
-                                navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id)) {
-                                    popUpTo(navController.graph.findStartDestination().id)
-                                    launchSingleTop = true
-                                }
-                                viewModel.selectLocation(null)
-                            },
-                            enabled = !isUnderConstruction,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (isUnderConstruction) "Coming soon" else "Directions", maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
 
-                    if (myLocation != null) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        TextButton(
-                            onClick = {
-                                navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id, fromMyLocation = true)) {
-                                    popUpTo(navController.graph.findStartDestination().id)
-                                    launchSingleTop = true
-                                }
-                                viewModel.selectLocation(null)
-                            },
-                            enabled = !isUnderConstruction,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Directions from my location", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (myLocation != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            TextButton(
+                                onClick = {
+                                    navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id, fromMyLocation = true)) {
+                                        popUpTo(navController.graph.findStartDestination().id)
+                                        launchSingleTop = true
+                                    }
+                                    viewModel.selectLocation(null)
+                                },
+                                enabled = !isUnderConstruction,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Directions from my location", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
                         }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

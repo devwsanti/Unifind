@@ -3,6 +3,7 @@ package com.example.unifind.ui.map
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ fun ZoomableMap(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .pointerInput(enableRotation) {
                 detectTransformGestures { centroid, pan, zoom, rotationChange ->
                     val oldScale = scale

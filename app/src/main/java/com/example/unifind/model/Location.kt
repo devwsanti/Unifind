@@ -8,11 +8,38 @@ package com.example.unifind.model
 abstract class Location(
     val id: String,
     val name: String,
-    val mapX: Float,
-    val mapY: Float,
+    mapX: Float,
+    mapY: Float,
     val latitude: Double? = null,
     val longitude: Double? = null
 ) : Searchable, Navigable {
+
+    val originalMapX: Float = mapX
+    val originalMapY: Float = mapY
+
+    var mapX: Float = mapX
+        private set
+
+    var mapY: Float = mapY
+        private set
+
+    /**
+     * OOP Concept: Encapsulation
+     * Controlled update of location map coordinates with clamping to [0, 1].
+     */
+    fun updateCoordinates(newX: Float, newY: Float) {
+        mapX = newX.coerceIn(0f, 1f)
+        mapY = newY.coerceIn(0f, 1f)
+    }
+
+    /**
+     * OOP Concept: Encapsulation
+     * Resets location map coordinates back to initial values from campus.json.
+     */
+    fun resetCoordinates() {
+        mapX = originalMapX
+        mapY = originalMapY
+    }
 
     /**
      * OOP Concept: Polymorphism

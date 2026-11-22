@@ -377,7 +377,19 @@ fun DirectionsScreen(
                         } else {
                             fromLocation?.name ?: "Unknown"
                         }
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        val graphRepo = remember(context) { com.example.unifind.data.GraphRepository(context) }
+                        val gapMeters = if (isFromMyLocation && activeRoute.nodes.size >= 2 && activeRoute.nodes[0].id == "MY_LOCATION") {
+                            graphRepo.graph.distanceMeters(activeRoute.nodes[0].mapX, activeRoute.nodes[0].mapY, activeRoute.nodes[1].mapX, activeRoute.nodes[1].mapY)
+                        } else 0.0
+
                         Text("Start at ${startName ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                        if (gapMeters > 5.0) {
+                            Text(
+                                "Walk about ${RouteSummaryFormatter.formatDistance(gapMeters)} m to the nearest path",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                         Text(
                             "Walk about ${RouteSummaryFormatter.formatDistance(activeRoute.distanceMeters)} m",
                             style = MaterialTheme.typography.bodyMedium

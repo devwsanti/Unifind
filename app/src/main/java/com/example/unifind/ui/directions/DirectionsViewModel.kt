@@ -154,37 +154,12 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
             _nearestGateResult.update { null }
             val myLoc = _currentMyLocation.value
             if (myLoc != null) {
-                val nearestNode = nearestNodeFinder.findNearestNode(graphRepo.graph.nodes, myLoc.mapX, myLoc.mapY)
-                if (nearestNode != null) {
-                    val endNodes = graphRepo.graph.entryNodes(to.id)
-                    var bestRoute: RouteResult? = null
-                    for (e in endNodes) {
-                        val route = routeFinder.findRoute(nearestNode.id, e.id)
-                        if (route != null) {
-                            val snapDist = graphRepo.graph.distanceMeters(myLoc.mapX, myLoc.mapY, nearestNode.mapX, nearestNode.mapY)
-                            val totalDist = route.distanceMeters + snapDist
-                            val adjusted = RouteResult(route.nodes, totalDist, route.entranceNode)
-                            if (bestRoute == null || adjusted.distanceMeters < bestRoute.distanceMeters) {
-                                bestRoute = adjusted
-                            }
-                        }
-                    }
-                    _routeResult.update { bestRoute }
-                    if (bestRoute != null) {
-                        val startNodeId = bestRoute.nodes.firstOrNull()?.id
-                        val endNodeId = bestRoute.nodes.lastOrNull()?.id
-                        if (startNodeId != null && endNodeId != null) {
-                            _altRouteResult.update {
-                                altRouteFinder.findAlternativeForRoute(bestRoute, startNodeId, endNodeId)
-                            }
-                        } else {
-                            _altRouteResult.update { null }
-                        }
-                    } else {
-                        _altRouteResult.update { null }
-                    }
+                val mainRoute = routePlanner.fromPoint(myLoc.mapX, myLoc.mapY, to.id)
+                _routeResult.update { mainRoute }
+                if (mainRoute != null) {
+                    val altRoute = routePlanner.alternativeFromPoint(myLoc.mapX, myLoc.mapY, mainRoute)
+                    _altRouteResult.update { altRoute }
                 } else {
-                    _routeResult.update { null }
                     _altRouteResult.update { null }
                 }
             } else {

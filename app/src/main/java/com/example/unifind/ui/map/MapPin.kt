@@ -3,8 +3,9 @@ package com.example.unifind.ui.map
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -20,6 +22,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,12 @@ import com.example.unifind.model.BuildingStatus
 import com.example.unifind.model.Facility
 import com.example.unifind.model.Gate
 import com.example.unifind.model.Location
+
+// Constant saturated colors so pins look identical in light and dark mode over the map
+private val BuildingPinColor = Color(0xFF1F2FBF)
+private val GatePinColor = Color.Red
+private val FacilityPinColor = Color.Green
+private val ConstructionPinColor = Color.Gray
 
 /**
  * OOP Concept: Polymorphism / Composition
@@ -41,15 +50,16 @@ fun MapPin(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onDrag: ((Offset) -> Unit)? = null,
+    isCalibrationMode: Boolean = false,
     isEditorMode: Boolean = false,
     rotation: Float = 0f
 ) {
-    val buildingColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
     val color = when (location) {
-        is Gate -> Color.Red
-        is Facility -> Color.Green
+        is Gate -> GatePinColor
+        is Facility -> FacilityPinColor
         is Building -> {
-            if (location.status == BuildingStatus.UNDER_CONSTRUCTION) Color.Gray else buildingColor
+            if (location.status == BuildingStatus.UNDER_CONSTRUCTION) ConstructionPinColor else BuildingPinColor
         }
         else -> Color.Black
     }
@@ -59,6 +69,8 @@ fun MapPin(
         scale = scale,
         isSelected = isSelected,
         onClick = onClick,
+        onDrag = onDrag,
+        isCalibrationMode = isCalibrationMode,
         modifier = modifier,
         isEditorMode = isEditorMode,
         rotation = rotation
@@ -72,6 +84,8 @@ fun MapPinBase(
     isSelected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onDrag: ((Offset) -> Unit)? = null,
+    isCalibrationMode: Boolean = false,
     isEditorMode: Boolean = false,
     label: String? = null,
     rotation: Float = 0f
@@ -80,20 +94,43 @@ fun MapPinBase(
     val widthDp = heightDp * 0.7f
     val alpha = if (isEditorMode) 0.4f else 1f
 
+    val touchWidthDp = if (isCalibrationMode) maxOf(40.dp, widthDp) else widthDp
+    val touchHeightDp = if (isCalibrationMode) maxOf(40.dp, heightDp) else heightDp
+
     // Wrapper anchoring the map-coordinate point 1:1 on layout
     Box(modifier = modifier) {
-        // The interactive pin body offsetting to center the tip down appropriately.
         Box(
             modifier = Modifier
-                .offset(x = -widthDp / 2, y = -heightDp)
-                .size(widthDp, heightDp)
+                .offset(x = -touchWidthDp / 2, y = -heightDp - (touchHeightDp - heightDp) / 2)
+                .size(touchWidthDp, touchHeightDp)
                 .graphicsLayer(
                     rotationZ = -rotation,
                     transformOrigin = TransformOrigin(0.5f, 1.0f)
                 )
-                .let { if (!isEditorMode) it.clickable { onClick() } else it }
+                .then(
+                    if (onDrag != null) {
+                        Modifier
+                            .pointerInput(Unit) {
+                                detectTapGestures(onTap = { onClick() })
+                            }
+                            .pointerInput(Unit) {
+                                detectDragGestures(
+                                    onDragStart = { onClick() },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        onDrag(dragAmount)
+                                    }
+                                )
+                            }
+                    } else if (!isEditorMode) {
+                        Modifier.clickable { onClick() }
+                    } else {
+                        Modifier
+                    }
+                ),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            Canvas(modifier = Modifier.fillMaxSize().graphicsLayer(alpha = alpha)) {
+            Canvas(modifier = Modifier.size(widthDp, heightDp).graphicsLayer(alpha = alpha)) {
                 val w = size.width
                 val h = size.height
 
@@ -111,7 +148,7 @@ fun MapPinBase(
                 }
 
                 drawPath(path = path, color = color)
-                drawPath(path = path, color = Color.White, style = Stroke(width = 1.dp.toPx()))
+                drawPath(path = path, color = Color.White, style = Stroke(width = 1.5.dp.toPx()))
                 drawCircle(color = Color.White, radius = w / 5f, center = Offset(w / 2f, w / 2f))
 
                 if (isSelected) {

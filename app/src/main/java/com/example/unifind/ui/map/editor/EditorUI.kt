@@ -25,19 +25,11 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.unifind.UniFindApplication
-import com.example.unifind.routing.CampusGraph
-import com.example.unifind.routing.DijkstraRouteFinder
-import com.example.unifind.routing.RoutePlanner
-import com.example.unifind.routing.RouteResult
-import com.example.unifind.ui.map.MapCoordinates
 
 @Composable
 fun EditorOverlay(
@@ -151,82 +143,97 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
     var showValidate by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.95f))
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        tonalElevation = 4.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // Row 1: Mode chips
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                .padding(vertical = 4.dp)
         ) {
-            val tools = GraphEditorViewModel.EditorTool.values()
-            tools.forEach { tool ->
-                FilterChip(
-                    selected = currentTool == tool,
-                    onClick = { viewModel.setTool(tool) },
-                    label = {
-                        Text(
-                            tool.name,
-                            fontSize = 10.sp,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                        )
-                    },
-                    modifier = Modifier.padding(horizontal = 2.dp)
-                )
-            }
-        }
-
-        // Row 2: Actions
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            TextButton(onClick = { viewModel.undo() }) {
-                Text(
-                    "Undo",
-                    fontSize = 10.sp,
-                    maxLines = 1
-                )
-            }
-            TextButton(onClick = { /* TODO Test */ }) {
-                Text(
-                    "Test",
-                    fontSize = 10.sp,
-                    maxLines = 1
-                )
-            }
-            TextButton(onClick = { showValidate = true }) {
-                Text(
-                    "Validate",
-                    fontSize = 10.sp,
-                    maxLines = 1
-                )
-            }
-            TextButton(onClick = {
-                val json = viewModel.getJson()
-                val clipboard =
-                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                clipboard.setPrimaryClip(ClipData.newPlainText("Graph JSON", json))
-            }) { Text("Copy", fontSize = 10.sp, maxLines = 1) }
-            TextButton(onClick = {
-                val json = viewModel.getJson()
-                val intent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, json)
+            // Row 1: Mode chips (Horizontally scrollable with min touch target of 40dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val tools = GraphEditorViewModel.EditorTool.values()
+                tools.forEach { tool ->
+                    FilterChip(
+                        selected = currentTool == tool,
+                        onClick = { viewModel.setTool(tool) },
+                        label = {
+                            Text(
+                                tool.name,
+                                style = MaterialTheme.typography.labelMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                    )
                 }
-                context.startActivity(Intent.createChooser(intent, "Share JSON"))
-            }) { Text("Share", fontSize = 10.sp, maxLines = 1) }
-            TextButton(
-                onClick = { showClearConfirm = true },
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)
-            ) { Text("Clear All", fontSize = 10.sp, maxLines = 1) }
+            }
+
+            // Row 2: Actions (Horizontally scrollable with min touch target of 40dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextButton(
+                    onClick = { viewModel.undo() },
+                    modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                ) {
+                    Text("Undo", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+                TextButton(
+                    onClick = { showValidate = true },
+                    modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                ) {
+                    Text("Validate", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+                TextButton(
+                    onClick = {
+                        val json = viewModel.getJson()
+                        val clipboard =
+                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("Graph JSON", json))
+                    },
+                    modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                ) {
+                    Text("Copy", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+                TextButton(
+                    onClick = {
+                        val json = viewModel.getJson()
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, json)
+                        }
+                        context.startActivity(Intent.createChooser(intent, "Share JSON"))
+                    },
+                    modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                ) {
+                    Text("Share", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+                TextButton(
+                    onClick = { showClearConfirm = true },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                ) {
+                    Text("Clear All", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+            }
         }
     }
 
@@ -258,7 +265,7 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                         viewModel.clearAll()
                         showClearConfirm = false
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                 ) {
                     Text("Clear All")
                 }
