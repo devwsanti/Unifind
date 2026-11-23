@@ -33,9 +33,9 @@ class SearchEngine(private val locations: List<Location>) {
                         searchables.add(room to SearchResult(
                             location = loc,
                             room = room,
-                            floorLabel = floor.label,
+                            floorLabel = room.floorLabel,
                             title = room.name,
-                            subtitle = "${loc.name} - ${floor.label}"
+                            subtitle = room.describe(loc.name)
                         ))
                     }
                 }

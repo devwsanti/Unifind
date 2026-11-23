@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -67,6 +68,7 @@ import kotlin.math.roundToInt
 @Composable
 fun MapScreen(
     locationId: String? = null,
+    roomId: String? = null,
     openImHere: Boolean = false,
     startPlacing: Boolean = false,
     isEditMode: Boolean = false,
@@ -77,6 +79,7 @@ fun MapScreen(
     currentLocationHolder: CurrentLocationHolder = viewModel()
 ) {
     val selectedLocation by viewModel.selectedLocation.collectAsState()
+    val selectedRoom by viewModel.selectedRoom.collectAsState()
     val isCalibrationMode by viewModel.isCalibrationMode.collectAsState()
     val locationsVersion by viewModel.locationsVersion.collectAsState()
     val placedLocations = remember(locationsVersion) { viewModel.placedLocations }
@@ -117,10 +120,10 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(locationId) {
+    LaunchedEffect(locationId, roomId) {
         if (locationId != null) {
             customFocusTarget = null
-            viewModel.selectLocationById(locationId)
+            viewModel.selectLocationById(locationId, roomId)
             val loc = viewModel.selectedLocation.value
             if (loc != null && loc.mapX == 0f && loc.mapY == 0f) {
                 snackbarHostState.showSnackbar("This location is not placed on the map yet.")
@@ -998,12 +1001,6 @@ fun MapScreen(
                                 val dist = item.distanceMeters
                                 val isUnderConstruction = loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION
 
-                                val headline = if (room != null) {
-                                    "${room.name} - ${loc.name}, ${res.floorLabel}"
-                                } else {
-                                    loc.name
-                                }
-
                                 val distanceText = if (isUnderConstruction) {
                                     "Coming soon"
                                 } else if (dist != null) {
@@ -1015,12 +1012,18 @@ fun MapScreen(
                                 val isEnabled = !isUnderConstruction && dist != null
 
                                 ListItem(
-                                    headlineContent = { Text(headline) },
+                                    headlineContent = {
+                                        Text(res.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                                    },
                                     supportingContent = {
-                                        Text(
-                                            distanceText,
-                                            color = if (isUnderConstruction) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
+                                        Column {
+                                            Text(res.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(
+                                                distanceText,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = if (isUnderConstruction) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     },
                                     modifier = Modifier
                                         .clickable(enabled = isEnabled) {
@@ -1057,7 +1060,7 @@ fun MapScreen(
                 val screenHeight = LocalConfiguration.current.screenHeightDp.dp
                 ModalBottomSheet(
                     onDismissRequest = { viewModel.selectLocation(null) },
-                    modifier = Modifier.heightIn(max = screenHeight * 0.35f)
+                    modifier = Modifier.heightIn(max = screenHeight * 0.40f)
                 ) {
                     Column(
                         modifier = Modifier
@@ -1078,6 +1081,7 @@ fun MapScreen(
 
                             val typeLabel = when {
                                 isUnderConstruction -> "Under Construction"
+                                selectedRoom != null -> "Room"
                                 loc is Building -> "Building"
                                 loc is Gate -> "Gate"
                                 loc is Facility -> "Facility"
@@ -1089,7 +1093,17 @@ fun MapScreen(
                             )
                         }
 
-                        if (loc is Building) {
+                        if (selectedRoom != null) {
+                            Text(
+                                text = selectedRoom!!.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Floor: ${selectedRoom!!.floorLabel}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else if (loc is Building) {
                             if (loc.college.isNotBlank()) {
                                 Text(
                                     text = loc.college,
@@ -1129,7 +1143,12 @@ fun MapScreen(
                             }
                             Button(
                                 onClick = {
-                                    navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id)) {
+                                    val route = if (selectedRoom != null) {
+                                        Screen.Directions.createRoute(toLocationId = loc.id, toRoomId = selectedRoom!!.id)
+                                    } else {
+                                        Screen.Directions.createRoute(toLocationId = loc.id)
+                                    }
+                                    navController.navigate(route) {
                                         popUpTo(navController.graph.findStartDestination().id)
                                         launchSingleTop = true
                                     }
@@ -1146,7 +1165,12 @@ fun MapScreen(
                             Spacer(modifier = Modifier.height(4.dp))
                             TextButton(
                                 onClick = {
-                                    navController.navigate(Screen.Directions.createRoute(toLocationId = loc.id, fromMyLocation = true)) {
+                                    val route = if (selectedRoom != null) {
+                                        Screen.Directions.createRoute(toLocationId = loc.id, fromMyLocation = true, toRoomId = selectedRoom!!.id)
+                                    } else {
+                                        Screen.Directions.createRoute(toLocationId = loc.id, fromMyLocation = true)
+                                    }
+                                    navController.navigate(route) {
                                         popUpTo(navController.graph.findStartDestination().id)
                                         launchSingleTop = true
                                     }

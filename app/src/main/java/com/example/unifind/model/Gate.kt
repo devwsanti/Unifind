@@ -14,6 +14,6 @@ class Gate(
 ) : Location(id, name, mapX, mapY, latitude, longitude) {
 
     override fun describe(): String {
-        return "Gate: $name"
+        return "Gate"
     }
 }

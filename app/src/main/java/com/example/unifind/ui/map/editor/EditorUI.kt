@@ -11,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,10 +28,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.unifind.ui.directions.RouteSummaryFormatter
 
 @Composable
 fun EditorOverlay(
@@ -40,13 +45,16 @@ fun EditorOverlay(
 ) {
     val updateTrigger by viewModel.updateTrigger.collectAsState()
     val selectedNodeId by viewModel.selectedNodeId.collectAsState()
+    val testState by viewModel.testState.collectAsState()
+    val allLocations = remember { viewModel.getAllLocations() }
+    val locationNameMap = remember(allLocations) { allLocations.associate { it.id to it.name } }
 
     // Read state safely triggering on update
     val state = remember(updateTrigger) { viewModel.editorState }
     val nodes = state.nodes
     val edges = state.edges
 
-    // Draw edges (Canvas works in PIXELS, container sizes are in DP -> multiply by density)
+    // Draw edges & test path (Canvas works in PIXELS, container sizes are in DP -> multiply by density)
     Canvas(modifier = Modifier.fillMaxSize()) {
         val strokeW = 3.dp.toPx() / scale
         val outlineW = strokeW + (2.dp.toPx() / scale)
@@ -66,6 +74,19 @@ fun EditorOverlay(
             // Orange core
             drawLine(color = Color(0xFFFFA500), start = start, end = end, strokeWidth = strokeW)
         }
+
+        // Draw test route path if active
+        val testRouteNodes = testState.routeResult?.nodes
+        if (!testRouteNodes.isNullOrEmpty()) {
+            val pathW = 6.dp.toPx() / scale
+            for (i in 0 until testRouteNodes.size - 1) {
+                val n1 = testRouteNodes[i]
+                val n2 = testRouteNodes[i + 1]
+                val start = Offset(n1.mapX * widthPx, n1.mapY * heightPx)
+                val end = Offset(n2.mapX * widthPx, n2.mapY * heightPx)
+                drawLine(color = Color(0xFF00E676), start = start, end = end, strokeWidth = pathW)
+            }
+        }
     }
 
     // Draw nodes (32dp touch target, 8/14dp visible dot)
@@ -73,8 +94,19 @@ fun EditorOverlay(
     for (node in nodes) {
         key(node.id) {
             val currentNode by rememberUpdatedState(node)
+            val isStartNode = node.id == testState.startNodeId
+            val isEndNode = node.id == testState.endNodeId
             val isSelected = node.id == selectedNodeId
-            val dotSize = if (isSelected) 14.dp else 8.dp
+            val dotSize = if (isSelected || isStartNode || isEndNode) 14.dp else 8.dp
+
+            val dotColor = if (node.locationId != null) Color(0xFF4CAF50) else Color.DarkGray
+
+            val borderModifier = when {
+                isStartNode -> Modifier.border(3.dp, Color(0xFF4CAF50), CircleShape)
+                isEndNode -> Modifier.border(3.dp, Color.Red, CircleShape)
+                isSelected -> Modifier.border(2.dp, Color.Black, CircleShape)
+                else -> Modifier
+            }
 
             Box(
                 modifier = Modifier
@@ -91,8 +123,6 @@ fun EditorOverlay(
                     .pointerInput(node.id, scale) {
                         detectDragGestures { change, dragAmount ->
                             change.consume()
-                            // dragAmount is in screen pixels; the map is zoomed by `scale`
-                            // and containerWidth/Height are in dp.
                             val dxDp = dragAmount.x / (dens * scale)
                             val dyDp = dragAmount.y / (dens * scale)
                             val n = currentNode
@@ -108,19 +138,21 @@ fun EditorOverlay(
                     modifier = Modifier
                         .size(dotSize)
                         .clip(CircleShape)
-                        .background(if (node.locationId != null) Color.Green else Color.DarkGray)
+                        .background(dotColor)
                         .border(1.dp, Color.White, CircleShape)
-                        .then(
-                            if (isSelected) Modifier.border(
-                                2.dp,
-                                Color.Black,
-                                CircleShape
-                            ) else Modifier
-                        )
+                        .then(borderModifier)
                 )
-                if (scale >= 2.5f || isSelected) {
+                val locId = node.locationId
+                val showLabel = scale >= 2.5f || isSelected || isStartNode || isEndNode || locId != null
+                if (showLabel) {
+                    val labelText = when {
+                        isStartNode -> "Start"
+                        isEndNode -> "End"
+                        locId != null -> locationNameMap[locId] ?: locId
+                        else -> node.id
+                    }
                     Text(
-                        text = node.locationId ?: node.id,
+                        text = labelText,
                         color = Color.Black,
                         fontSize = 10.sp,
                         modifier = Modifier
@@ -136,9 +168,15 @@ fun EditorOverlay(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
     val currentTool by viewModel.currentTool.collectAsState()
+    val selectedNodeId by viewModel.selectedNodeId.collectAsState()
+    val testState by viewModel.testState.collectAsState()
+    val updateTrigger by viewModel.updateTrigger.collectAsState()
+    val state = remember(updateTrigger) { viewModel.editorState }
+
     val context = LocalContext.current
     var showValidate by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -154,6 +192,39 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                 .fillMaxWidth()
                 .padding(vertical = 4.dp)
         ) {
+            // Test Route Card above toolbar when TEST mode has start or end node selected
+            if (currentTool == GraphEditorViewModel.EditorTool.TEST && (testState.startNodeId != null || testState.endNodeId != null)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        val text = when {
+                            testState.noPathFound -> "No path between these nodes"
+                            testState.routeResult != null -> RouteSummaryFormatter.formatSummary(testState.routeResult!!.distanceMeters)
+                            testState.startNodeId != null -> "Tap end node to test route"
+                            else -> ""
+                        }
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(onClick = { viewModel.clearTest() }) {
+                            Text("Clear test")
+                        }
+                    }
+                }
+            }
+
             // Row 1: Mode chips (Horizontally scrollable with min touch target of 40dp)
             Row(
                 modifier = Modifier
@@ -176,7 +247,9 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                                 overflow = TextOverflow.Ellipsis
                             )
                         },
-                        modifier = Modifier.defaultMinSize(minHeight = 40.dp)
+                        modifier = Modifier
+                            .defaultMinSize(minHeight = 40.dp)
+                            .semantics { contentDescription = "${tool.name} tool" }
                     )
                 }
             }
@@ -232,6 +305,120 @@ fun EditorToolbar(viewModel: GraphEditorViewModel = viewModel()) {
                     modifier = Modifier.defaultMinSize(minHeight = 40.dp)
                 ) {
                     Text("Clear All", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                }
+            }
+        }
+    }
+
+    if (currentTool == GraphEditorViewModel.EditorTool.LINK && selectedNodeId != null) {
+        val allLocations = remember { viewModel.getAllLocations() }
+        val selectedNode = state.nodes.find { it.id == selectedNodeId }
+        var searchQuery by remember { mutableStateOf("") }
+
+        val locationToNodeMap = remember(updateTrigger) {
+            state.nodes.mapNotNull { node ->
+                node.locationId?.let { locId -> locId to node.id }
+            }.toMap()
+        }
+
+        val filteredLocations = remember(searchQuery, allLocations, locationToNodeMap) {
+            allLocations
+                .filter { loc ->
+                    searchQuery.isBlank() || loc.name.contains(searchQuery, ignoreCase = true) || loc.id.contains(searchQuery, ignoreCase = true)
+                }
+                .sortedWith(compareBy(
+                    { locationToNodeMap[it.id] != null },
+                    { it.name }
+                ))
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = { viewModel.clearSelectedNode() }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Link Location to $selectedNodeId",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (selectedNode?.locationId != null) {
+                        TextButton(
+                            onClick = {
+                                viewModel.linkLocation(null)
+                                viewModel.clearSelectedNode()
+                            }
+                        ) {
+                            Text("Unlink", color = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search location...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 300.dp)
+                ) {
+                    items(filteredLocations, key = { it.id }) { loc ->
+                        val linkedNodeId = locationToNodeMap[loc.id]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.linkLocation(loc.id)
+                                    viewModel.clearSelectedNode()
+                                }
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = loc.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (linkedNodeId == null) {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        text = "not linked",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = "Linked to $linkedNodeId",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

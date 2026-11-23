@@ -1,10 +1,12 @@
 package com.example.unifind.ui.directions
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -67,6 +70,7 @@ fun DirectionsScreen(
     }
 
     val fromLocation by viewModel.fromLocation.collectAsState()
+    val fromRoom by viewModel.fromRoom.collectAsState()
     val toLocation by viewModel.toLocation.collectAsState()
     val targetRoom by viewModel.targetRoom.collectAsState()
     val isNearestGateAuto by viewModel.isNearestGateAuto.collectAsState()
@@ -84,8 +88,8 @@ fun DirectionsScreen(
             searchEngine = viewModel.searchEngine,
             routePlanner = viewModel.routePlannerInstance,
             myLocation = myLocation,
-            onLocationSelected = { loc, _ ->
-                viewModel.setFromLocation(loc)
+            onLocationSelected = { loc, room ->
+                viewModel.setFromLocation(loc, room)
                 showFromPicker = false
             },
             onNearestGateSelected = {
@@ -138,57 +142,56 @@ fun DirectionsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Box(modifier = Modifier.fillMaxWidth().clickable { showFromPicker = true }) {
-                            val fromText = if (isFromMyLocation) {
-                                if (myLocation != null) {
-                                    if (myLocation?.label.isNullOrBlank()) "My location" else "My location - near ${myLocation?.label}"
+                        val (fromPrimary, fromSecondary) = when {
+                            isFromMyLocation -> {
+                                val sec = if (myLocation != null) {
+                                    if (myLocation?.label.isNullOrBlank()) "" else "Near ${myLocation?.label}"
                                 } else {
-                                    "My location (Not set)"
+                                    "Not set"
                                 }
-                            } else if (isNearestGateAuto) {
-                                "Nearest gate (auto)"
-                            } else {
-                                fromLocation?.name ?: ""
+                                "My location" to sec
                             }
-                            OutlinedTextField(
-                                value = fromText,
-                                onValueChange = {},
-                                enabled = false,
-                                label = { Text("From") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Box(modifier = Modifier.fillMaxWidth().clickable { showToPicker = true }) {
-                            val toText = if (targetRoom != null && toLocation != null) {
-                                "${targetRoom?.name} (${toLocation?.name})"
-                            } else {
-                                toLocation?.name ?: ""
+                            isNearestGateAuto -> {
+                                "Nearest gate (auto)" to (fromLocation?.name ?: "")
                             }
-                            OutlinedTextField(
-                                value = toText,
-                                onValueChange = {},
-                                enabled = false,
-                                label = { Text("To") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
+                            fromLocation != null -> {
+                                if (fromRoom != null) {
+                                    fromRoom!!.name to "${fromLocation!!.name} - ${fromRoom!!.floorLabel}"
+                                } else {
+                                    fromLocation!!.name to fromLocation!!.describe()
+                                }
+                            }
+                            else -> "" to ""
                         }
+                        DirectionField(
+                            label = "From",
+                            primaryText = fromPrimary,
+                            secondaryText = fromSecondary,
+                            onClick = { showFromPicker = true }
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        val (toPrimary, toSecondary) = when {
+                            toLocation != null -> {
+                                if (targetRoom != null) {
+                                    targetRoom!!.name to "${toLocation!!.name} - ${targetRoom!!.floorLabel}"
+                                } else {
+                                    toLocation!!.name to toLocation!!.describe()
+                                }
+                            }
+                            else -> "" to ""
+                        }
+                        DirectionField(
+                            label = "To",
+                            primaryText = toPrimary,
+                            secondaryText = toSecondary,
+                            onClick = { showToPicker = true }
+                        )
                     }
                     Spacer(Modifier.width(8.dp))
                     TextButton(onClick = { viewModel.swapLocations() }) {
@@ -369,21 +372,23 @@ fun DirectionsScreen(
                             Spacer(Modifier.height(4.dp))
                         }
 
-                        val startName = if (isFromMyLocation) {
-                            val label = myLocation?.label
-                            if (!label.isNullOrBlank()) "My location - near $label" else "My location"
-                        } else if (isNearestGateAuto) {
-                            fromLocation?.name
-                        } else {
-                            fromLocation?.name ?: "Unknown"
-                        }
                         val context = androidx.compose.ui.platform.LocalContext.current
                         val graphRepo = remember(context) { com.example.unifind.data.GraphRepository(context) }
                         val gapMeters = if (isFromMyLocation && activeRoute.nodes.size >= 2 && activeRoute.nodes[0].id == "MY_LOCATION") {
                             graphRepo.graph.distanceMeters(activeRoute.nodes[0].mapX, activeRoute.nodes[0].mapY, activeRoute.nodes[1].mapX, activeRoute.nodes[1].mapY)
                         } else 0.0
 
-                        Text("Start at ${startName ?: "Unknown"}", style = MaterialTheme.typography.bodyMedium)
+                        val startText = if (isFromMyLocation) {
+                            val label = myLocation?.label
+                            val locName = if (!label.isNullOrBlank()) "My location - near $label" else "My location"
+                            "Start at $locName"
+                        } else if (isNearestGateAuto) {
+                            "Start at ${fromLocation?.name ?: "Nearest gate"}"
+                        } else {
+                            RouteSummaryFormatter.formatStartText(fromLocation?.name ?: "Unknown", fromRoom)
+                        }
+
+                        Text(startText, style = MaterialTheme.typography.bodyMedium)
                         if (gapMeters > 5.0) {
                             Text(
                                 "Walk about ${RouteSummaryFormatter.formatDistance(gapMeters)} m to the nearest path",
@@ -394,12 +399,11 @@ fun DirectionsScreen(
                             "Walk about ${RouteSummaryFormatter.formatDistance(activeRoute.distanceMeters)} m",
                             style = MaterialTheme.typography.bodyMedium
                         )
-                        val arriveText = if (targetRoom != null && toLocation != null) {
-                            "Arrive at ${targetRoom?.name} (${toLocation?.name})"
-                        } else {
-                            "Arrive at ${toLocation?.name ?: "Unknown"}"
+
+                        val arrivalLines = RouteSummaryFormatter.formatArrivalLines(toLocation?.name ?: "Unknown", targetRoom)
+                        arrivalLines.forEach { line ->
+                            Text(line, style = MaterialTheme.typography.bodyMedium)
                         }
-                        Text(arriveText, style = MaterialTheme.typography.bodyMedium)
 
                         if (isNearestGateAuto && nearestGateResult != null) {
                             Spacer(Modifier.height(8.dp))
@@ -442,6 +446,58 @@ fun DirectionsScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun DirectionField(
+    label: String,
+    primaryText: String,
+    secondaryText: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(4.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (primaryText.isNotBlank()) {
+                Text(
+                    text = primaryText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            } else {
+                Text(
+                    text = "Select location",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (secondaryText.isNotBlank()) {
+                Text(
+                    text = secondaryText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -574,12 +630,6 @@ fun LocationPickerSheet(
                         val dist = item.distanceMeters
                         val isUnderConstruction = loc is Building && loc.status == BuildingStatus.UNDER_CONSTRUCTION
 
-                        val headline = if (room != null) {
-                            "${room.name} - ${loc.name}, ${res.floorLabel}"
-                        } else {
-                            loc.name
-                        }
-
                         val distanceText = if (isUnderConstruction) {
                             "Coming soon"
                         } else if (dist != null) {
@@ -597,7 +647,8 @@ fun LocationPickerSheet(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(headline)
+                                Text(res.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                                Text(res.subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 if (distanceText.isNotBlank()) {
                                     Text(
                                         distanceText,

@@ -15,6 +15,6 @@ class Facility(
 ) : Location(id, name, mapX, mapY, latitude, longitude) {
 
     override fun describe(): String {
-        return "Facility ($category): $name"
+        return category.ifBlank { "Facility" }
     }
 }

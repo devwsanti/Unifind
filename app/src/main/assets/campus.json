@@ -102,6 +102,13 @@
               "sharedWith": []
             },
             {
+              "id": "heb_faculty",
+              "name": "Conference Room",
+              "floorLabel": "1st Floor",
+              "ownerCollege": null,
+              "sharedWith": []
+            },
+            {
               "id": "heb_101",
               "name": "HEB101",
               "floorLabel": "1st Floor",

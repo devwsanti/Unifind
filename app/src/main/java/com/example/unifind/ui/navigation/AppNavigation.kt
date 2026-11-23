@@ -185,14 +185,17 @@ fun AppNavigation() {
                 arguments = listOf(
                     navArgument("locationId") { type = NavType.StringType; nullable = true },
                     navArgument("openImHere") { type = NavType.BoolType; defaultValue = false },
-                    navArgument("startPlacing") { type = NavType.BoolType; defaultValue = false }
+                    navArgument("startPlacing") { type = NavType.BoolType; defaultValue = false },
+                    navArgument("roomId") { type = NavType.StringType; nullable = true }
                 )
             ) { backStackEntry ->
                 val locationId = backStackEntry.arguments?.getString("locationId")
                 val openImHere = backStackEntry.arguments?.getBoolean("openImHere") ?: false
                 val startPlacing = backStackEntry.arguments?.getBoolean("startPlacing") ?: false
+                val roomId = backStackEntry.arguments?.getString("roomId")
                 MapScreen(
                     locationId = locationId,
+                    roomId = roomId,
                     openImHere = openImHere,
                     startPlacing = startPlacing,
                     isEditMode = if (AppConfig.DEVELOPER_MODE) isEditMode else false,

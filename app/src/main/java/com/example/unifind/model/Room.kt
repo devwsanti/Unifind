@@ -12,6 +12,14 @@ class Room(
     val sharedWith: List<String>
 ) : Searchable {
 
+    /**
+     * OOP Concept: Helper / Encapsulation
+     * Formats secondary display text for a room given its building name.
+     */
+    fun describe(buildingName: String): String {
+        return "$buildingName - $floorLabel"
+    }
+
     override fun matches(query: String): Boolean {
         val normName = name.replace(Regex("[ .-]"), "").lowercase()
         val normQuery = query.replace(Regex("[ .-]"), "").lowercase()

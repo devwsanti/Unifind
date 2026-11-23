@@ -44,6 +44,9 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
     private val _fromLocation = MutableStateFlow<Location?>(null)
     val fromLocation: StateFlow<Location?> = _fromLocation.asStateFlow()
 
+    private val _fromRoom = MutableStateFlow<com.example.unifind.model.Room?>(null)
+    val fromRoom: StateFlow<com.example.unifind.model.Room?> = _fromRoom.asStateFlow()
+
     private val _toLocation = MutableStateFlow<Location?>(null)
     val toLocation: StateFlow<Location?> = _toLocation.asStateFlow()
 
@@ -71,10 +74,11 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
     private val _isFastestSelected = MutableStateFlow(true)
     val isFastestSelected: StateFlow<Boolean> = _isFastestSelected.asStateFlow()
 
-    fun setFromLocation(location: Location?) {
+    fun setFromLocation(location: Location?, room: com.example.unifind.model.Room? = null) {
         _isNearestGateAuto.update { false }
         _isFromMyLocation.update { false }
         _fromLocation.update { location }
+        _fromRoom.update { room }
         calculateRoute()
     }
 
@@ -82,6 +86,7 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
         _isNearestGateAuto.update { true }
         _isFromMyLocation.update { false }
         _fromLocation.update { null }
+        _fromRoom.update { null }
         calculateRoute()
     }
 
@@ -89,6 +94,7 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
         _isNearestGateAuto.update { false }
         _isFromMyLocation.update { true }
         _fromLocation.update { null }
+        _fromRoom.update { null }
         _currentMyLocation.update { myLocation }
         calculateRoute()
     }
@@ -125,16 +131,20 @@ class DirectionsViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun swapLocations() {
-        _targetRoom.update { null }
         if (_isNearestGateAuto.value || _isFromMyLocation.value) {
             _isNearestGateAuto.update { false }
             _isFromMyLocation.update { false }
             _fromLocation.update { _toLocation.value }
+            _fromRoom.update { _targetRoom.value }
             _toLocation.update { null }
+            _targetRoom.update { null }
         } else {
-            val temp = _fromLocation.value
+            val tempLoc = _fromLocation.value
+            val tempRoom = _fromRoom.value
             _fromLocation.update { _toLocation.value }
-            _toLocation.update { temp }
+            _fromRoom.update { _targetRoom.value }
+            _toLocation.update { tempLoc }
+            _targetRoom.update { tempRoom }
         }
         calculateRoute()
     }

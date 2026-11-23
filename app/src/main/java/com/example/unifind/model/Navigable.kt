@@ -6,4 +6,6 @@ package com.example.unifind.model
  */
 interface Navigable {
     fun getEntryPoint(): Pair<Float, Float>
+    // an abstract method, typically representing latitude and logitude, and x and y
+
 }

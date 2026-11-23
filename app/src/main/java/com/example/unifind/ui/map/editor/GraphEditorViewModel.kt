@@ -3,6 +3,8 @@ package com.example.unifind.ui.map.editor
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.unifind.UniFindApplication
+import com.example.unifind.model.Location
+import com.example.unifind.routing.RouteResult
 import com.example.unifind.routing.editor.GraphEditorState
 import com.example.unifind.routing.editor.ValidationReport
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,11 +23,21 @@ class GraphEditorViewModel(application: Application) : AndroidViewModel(applicat
 
     enum class EditorTool { ADD, CONNECT, MOVE, DELETE, LINK, TEST }
 
+    data class TestState(
+        val startNodeId: String? = null,
+        val endNodeId: String? = null,
+        val routeResult: RouteResult? = null,
+        val noPathFound: Boolean = false
+    )
+
     private val _currentTool = MutableStateFlow(EditorTool.ADD)
     val currentTool: StateFlow<EditorTool> = _currentTool.asStateFlow()
 
     private val _selectedNodeId = MutableStateFlow<String?>(null)
     val selectedNodeId: StateFlow<String?> = _selectedNodeId.asStateFlow()
+
+    private val _testState = MutableStateFlow(TestState())
+    val testState: StateFlow<TestState> = _testState.asStateFlow()
 
     private val _updateTrigger = MutableStateFlow(0)
     val updateTrigger: StateFlow<Int> = _updateTrigger.asStateFlow()
@@ -52,6 +64,17 @@ class GraphEditorViewModel(application: Application) : AndroidViewModel(applicat
         if (tool != EditorTool.LINK) {
             _selectedNodeId.update { null }
         }
+        if (tool != EditorTool.TEST) {
+            _testState.update { TestState() }
+        }
+    }
+
+    fun clearSelectedNode() {
+        _selectedNodeId.update { null }
+    }
+
+    fun clearTest() {
+        _testState.update { TestState() }
     }
 
     fun handleMapTap(mapX: Float, mapY: Float) {
@@ -78,10 +101,31 @@ class GraphEditorViewModel(application: Application) : AndroidViewModel(applicat
                 if (_selectedNodeId.value == nodeId) {
                     _selectedNodeId.update { null }
                 }
+                val currentTest = _testState.value
+                if (currentTest.startNodeId == nodeId || currentTest.endNodeId == nodeId) {
+                    _testState.update { TestState() }
+                }
                 notifyStateChanged()
             }
             EditorTool.LINK -> {
                 _selectedNodeId.update { nodeId }
+            }
+            EditorTool.TEST -> {
+                val current = _testState.value
+                if (current.startNodeId == null || current.endNodeId != null || current.noPathFound) {
+                    _testState.update { TestState(startNodeId = nodeId) }
+                } else {
+                    val startId = current.startNodeId
+                    val route = editorState.findShortestPath(startId, nodeId)
+                    _testState.update {
+                        TestState(
+                            startNodeId = startId,
+                            endNodeId = nodeId,
+                            routeResult = route,
+                            noPathFound = (route == null)
+                        )
+                    }
+                }
             }
             else -> {
                 _selectedNodeId.update { nodeId }
@@ -112,7 +156,12 @@ class GraphEditorViewModel(application: Application) : AndroidViewModel(applicat
     fun clearAll() {
         editorState.clearAll()
         _selectedNodeId.update { null }
+        _testState.update { TestState() }
         notifyStateChanged()
+    }
+
+    fun getAllLocations(): List<Location> {
+        return repository.getAllLocations()
     }
 
     private fun notifyStateChanged() {

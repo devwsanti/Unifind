@@ -10,4 +10,5 @@ interface RouteFinder {
         toNodeId: String,
         bannedEdges: Set<Pair<String, String>> = emptySet()
     ): RouteResult?
+    // The abstract method defining the inputs and output of the routing operation
 }

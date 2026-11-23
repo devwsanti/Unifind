@@ -45,7 +45,8 @@ abstract class Location(
      * OOP Concept: Polymorphism
      * Abstract method that must be implemented by subclasses to provide a specific description.
      */
-    abstract fun describe(): String
+    abstract fun describe(): String //indicated that this function has no implementation,
+    // describe - which takes no input parameters
 
     override fun matches(query: String): Boolean {
         val normName = name.replace(Regex("[ .-]"), "").lowercase()

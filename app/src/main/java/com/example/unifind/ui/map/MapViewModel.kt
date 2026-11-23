@@ -38,6 +38,9 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedLocation = MutableStateFlow<Location?>(null)
     val selectedLocation: StateFlow<Location?> = _selectedLocation.asStateFlow()
 
+    private val _selectedRoom = MutableStateFlow<com.example.unifind.model.Room?>(null)
+    val selectedRoom: StateFlow<com.example.unifind.model.Room?> = _selectedRoom.asStateFlow()
+
     private val _mapMode = MutableStateFlow<MapMode>(MapMode.View)
     val mapMode: StateFlow<MapMode> = _mapMode.asStateFlow()
 
@@ -60,7 +63,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         _mapMode.update { targetMode }
         _isCalibrationMode.update { targetMode is MapMode.Calibrate }
         if (targetMode is MapMode.Calibrate) {
-            _selectedLocation.update { null }
+            selectLocation(null, null)
         }
     }
 
@@ -69,15 +72,20 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         setMapMode(nextMode)
     }
 
-    fun selectLocation(location: Location?) {
+    fun selectLocation(location: Location?, room: com.example.unifind.model.Room? = null) {
         _selectedLocation.update { location }
+        _selectedRoom.update { room }
     }
 
-    fun selectLocationById(id: String?) {
+    fun selectLocationById(id: String?, roomId: String? = null) {
         if (id != null) {
-            _selectedLocation.update { repository.findById(id) }
+            val loc = repository.findById(id)
+            val room = if (roomId != null && loc is com.example.unifind.model.Building) {
+                loc.floors.flatMap { it.rooms }.find { it.id == roomId }
+            } else null
+            selectLocation(loc, room)
         } else {
-            _selectedLocation.update { null }
+            selectLocation(null, null)
         }
     }
 

@@ -1,5 +1,5 @@
 package com.example.unifind.config
-
+// Declares that this file belongs to the config module of the UniFind application
 /**
  * Global application configuration settings.
  * OOP Concept: Encapsulation / Singleton (Grouping application configuration constants in a single read-only object).
@@ -8,4 +8,5 @@ package com.example.unifind.config
  */
 object AppConfig {
     const val DEVELOPER_MODE = true
+    // You directly reference it anywhere in the project as AppConfig.DEVELOPER_MODE
 }

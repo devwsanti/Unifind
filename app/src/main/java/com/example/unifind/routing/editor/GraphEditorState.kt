@@ -2,6 +2,9 @@ package com.example.unifind.routing.editor
 
 import com.example.unifind.data.dto.GraphDto
 import com.example.unifind.data.dto.GraphNodeDto
+import com.example.unifind.routing.CampusGraph
+import com.example.unifind.routing.DijkstraRouteFinder
+import com.example.unifind.routing.RouteResult
 import com.example.unifind.routing.WaypointNode
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -63,10 +66,29 @@ class GraphEditorState {
 
     fun setLocationId(nodeId: String, locationId: String?) {
         saveSnapshot()
+        if (locationId != null) {
+            val prevIndex = nodes.indexOfFirst { it.locationId == locationId }
+            if (prevIndex != -1 && nodes[prevIndex].id != nodeId) {
+                nodes[prevIndex] = nodes[prevIndex].copy(locationId = null)
+            }
+        }
         val index = nodes.indexOfFirst { it.id == nodeId }
         if (index != -1) {
             nodes[index] = nodes[index].copy(locationId = locationId)
         }
+    }
+
+    fun findShortestPath(
+        fromNodeId: String,
+        toNodeId: String,
+        imageWidth: Int = 941,
+        imageHeight: Int = 1171,
+        metersPerPixel: Double = 0.2568
+    ): RouteResult? {
+        if (nodes.none { it.id == fromNodeId } || nodes.none { it.id == toNodeId }) return null
+        val graph = CampusGraph(nodes, edges, imageWidth, imageHeight, metersPerPixel)
+        val finder = DijkstraRouteFinder(graph)
+        return finder.findRoute(fromNodeId, toNodeId, emptySet())
     }
 
     fun clearAll() {
